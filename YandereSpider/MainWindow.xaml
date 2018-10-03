@@ -5,30 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YandereSpider"
         mc:Ignorable="d"
-        Title="yande.re 链接提取" Height="720" Width="1280" WindowStartupLocation="CenterScreen" Loaded="MainWindow_Loaded" KeyDown="MainWindow_KeyDown">
-    <Grid Margin="5">
+        Title="yande.re 链接提取" Height="720" Width="1280" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen" Loaded="MainWindow_Loaded" KeyDown="MainWindow_KeyDown">
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="130"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="45"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="5"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="145" MinHeight="145" MaxHeight="360"/>
         </Grid.RowDefinitions>
-        <GridSplitter Grid.Row="2" Grid.ColumnSpan="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch">
-            <GridSplitter.Background>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ScrollBarColorKey}}"/>
-            </GridSplitter.Background>
-        </GridSplitter>
-        <WebBrowser x:Name="webBrowser" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch" Grid.ColumnSpan="2" Grid.Row="1" Navigated="WebBrowser_Navigated"/>
-        <Button Content="←" HorizontalAlignment="Left" Margin="5,5,0,5" Width="35" FontSize="16" IsEnabled="{Binding WebBrowserCanGoBack.Value, ElementName=mainWindow}" Click="GoBackButton_Click"/>
-        <Button Content="→" HorizontalAlignment="Left" Margin="45,5,0,5" Width="35" FontSize="16" IsEnabled="{Binding WebBrowserCanGoForward.Value, ElementName=mainWindow}" Click="GoForwardButton_Click"/>
-        <Button Content="🏠" HorizontalAlignment="Left" Margin="85,5,0,5" Width="35" FontSize="16" Click="HomePageButton_Click"/>
-        <Button Content="→" Grid.Column="1" HorizontalAlignment="Right" Margin="0,5,5,5" Width="35" FontSize="16" Click="GoToButton_Click"/>
-        <TextBox x:Name="addressTextBox" Grid.ColumnSpan="2" Margin="130,5,50,5" VerticalContentAlignment="Center" TextWrapping="NoWrap" FontSize="16" Text="{Binding BindingPageLink.Value, ElementName=mainWindow, Mode=OneWay}" KeyDown="AddressTextBox_KeyDown"/>
-        <TextBox Margin="5" Grid.Row="3" Grid.Column="1" TextWrapping="NoWrap" Text="{Binding ImageLinks.Value, ElementName=mainWindow}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" IsReadOnly="True"/>
+        <GridSplitter Grid.Row="2" Grid.ColumnSpan="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+        <WebBrowser x:Name="webBrowser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.ColumnSpan="2" Grid.Row="1" Navigated="WebBrowser_Navigated"/>
+        <Button Content="←" HorizontalAlignment="Left" Margin="5,5,0,5" Height="35" Width="35" FontSize="16" IsEnabled="{Binding WebBrowserCanGoBack.Value, ElementName=mainWindow}" Click="GoBackButton_Click"/>
+        <Button Content="→" HorizontalAlignment="Left" Margin="45,5,0,5" Height="35" Width="35" FontSize="16" IsEnabled="{Binding WebBrowserCanGoForward.Value, ElementName=mainWindow}" Click="GoForwardButton_Click"/>
+        <Button Content="🏠" HorizontalAlignment="Left" Margin="85,5,0,5" Height="35" Width="35" FontSize="16" Click="HomePageButton_Click"/>
+        <Button Content="→" Grid.Column="1" HorizontalAlignment="Right" Margin="0,5,5,5" Height="35" Width="35" FontSize="16" Click="GoToButton_Click"/>
+        <TextBox x:Name="addressTextBox" Grid.ColumnSpan="3" Margin="130,5,50,5" VerticalContentAlignment="Center" TextWrapping="NoWrap" FontSize="16" Text="{Binding BindingPageLink.Value, ElementName=mainWindow, Mode=OneWay}" KeyDown="AddressTextBox_KeyDown"/>
+        <TextBox Grid.Row="3" Grid.Column="1" TextWrapping="NoWrap" Text="{Binding ImageLinks.Value, ElementName=mainWindow}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" IsReadOnly="True"/>
         <Button x:Name="extractButton" Content="提取链接" Margin="5,5,5,0" Height="30" Grid.Row="3" VerticalAlignment="Top" Click="ExtractButton_Click"/>
         <Button x:Name="enumerateButton" Content="遍历页面" Margin="5,40,5,0" Height="30" Grid.Row="3" VerticalAlignment="Top" Click="EnumerateButton_Click"/>
         <Button Content="复制到剪贴板" Margin="5,0,5,40" Height="30" Grid.Row="3" VerticalAlignment="Bottom" Click="CopyButton_Click"/>

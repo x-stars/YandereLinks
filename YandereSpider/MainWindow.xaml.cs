@@ -295,9 +295,9 @@ namespace YandereSpider
             e.Result = e.Argument;
 
             var page = this.yanderePage;
-            if (!page.IsYanderePage) { return; }
+            if (!YanderePage.IsYanderePage(page)) { return; }
 
-            if (page.IsPoolsPage)
+            if (YanderePage.IsPoolsPage(page))
             {
                 foreach (var poolPage in page.PoolPages)
                 {
@@ -355,7 +355,7 @@ namespace YandereSpider
             e.Result = e.Argument;
 
             var firstPage = this.yanderePage;
-            if (!firstPage.IsYanderePage) { return; }
+            if (!YanderePage.IsYanderePage(firstPage)) { return; }
 
             foreach (var page in firstPage)
             {
@@ -364,7 +364,7 @@ namespace YandereSpider
                 this.BindingPageLink.Value = page.PageLink;
                 this.enumeratePageWorker.ReportProgress(0);
 
-                if (page.IsPoolsPage)
+                if (YanderePage.IsPoolsPage(page))
                 {
                     foreach (var poolPage in page.PoolPages)
                     {

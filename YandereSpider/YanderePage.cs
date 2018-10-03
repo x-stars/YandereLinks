@@ -79,15 +79,7 @@ namespace YandereSpider
         /// <param name="pageLink">页面的链接。</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="pageLink"/> 为 <see langword="null"/>。</exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="pageLink"/> 为空字符串或全为空白字符。</exception>
-        public YanderePage(string pageLink)
-        {
-            YanderePage.CheckNotNullOrWhitespace(pageLink, nameof(pageLink));
-
-            this.PageLink = pageLink;
-            this.documentTextTask = new HttpClient().GetStringAsync(pageLink);
-        }
+        public YanderePage(string pageLink) : this(pageLink, true) { }
 
         /// <summary>
         /// 使用页面的链接和 HTML 文本初始化 <see cref="YanderePage"/> 类的新实例。
@@ -96,14 +88,13 @@ namespace YandereSpider
         /// <param name="documentText">页面的 HTML 文本。</param>
         /// <exception cref="ArgumentNullException"><paramref name="pageLink"/> 或
         /// <paramref name="documentText"/> 为 <see langword="null"/>。</exception>
-        /// <exception cref="ArgumentException"><paramref name="pageLink"/> 或
-        /// <paramref name="documentText"/> 为空字符串或全为空白字符。</exception>
-        public YanderePage(string pageLink, string documentText)
+        public YanderePage(string pageLink, string documentText) : this(pageLink, false)
         {
-            YanderePage.CheckNotNullOrWhitespace(pageLink, nameof(pageLink));
-            YanderePage.CheckNotNullOrWhitespace(documentText, nameof(documentText));
-
-            this.PageLink = pageLink;
+            if (documentText is null)
+            {
+                throw new ArgumentNullException(nameof(documentText));
+            }
+            
             this.documentTextTask = new Task<string>(() => documentText);
             this.documentTextTask.Start();
         }
@@ -118,25 +109,19 @@ namespace YandereSpider
         /// 以确保基类能够正确读取页面的 HTML 文本并获取链接。
         /// </remarks>
         /// <param name="pageLink">页面的链接。</param>
-        /// <param name="getDocument">指示是否获取页面的 HTML 文本。</param>
+        /// <param name="getsDocument">指示是否获取页面的 HTML 文本。</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="pageLink"/> 为 <see langword="null"/>。</exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="pageLink"/> 为空字符串或全为空白字符。</exception>
-        protected YanderePage(string pageLink, bool getDocument)
+        protected YanderePage(string pageLink, bool getsDocument)
         {
-            YanderePage.CheckNotNullOrWhitespace(pageLink, nameof(pageLink));
+            if (pageLink is null)
+            {
+                throw new ArgumentNullException(nameof(pageLink));
+            }
 
             this.PageLink = pageLink;
-            if (getDocument)
-            {
-                this.documentTextTask = new HttpClient().GetStringAsync(pageLink);
-            }
-            else
-            {
-                this.documentTextTask = new Task<string>(() => string.Empty);
-                this.documentTextTask.Start();
-            }
+            this.documentTextTask = getsDocument ?
+                new HttpClient().GetStringAsync(pageLink) : null;
         }
 
         /// <summary>
@@ -196,6 +181,8 @@ namespace YandereSpider
         {
             get
             {
+                if (this.documentTextTask is null) { return string.Empty; }
+
                 try
                 {
                     return this.documentTextTask.Result;
@@ -261,38 +248,6 @@ namespace YandereSpider
                 return int.Parse(lastPageIndexString);
             }
         }
-
-        /// <summary>
-        /// 指示当前页面是否为 yande.re 的页面。
-        /// </summary>
-        public bool IsYanderePage =>
-            this.PageLink.StartsWith(YanderePage.IndexPageLink);
-
-        /// <summary>
-        /// 指示当前页面是否为 Posts 页面。
-        /// </summary>
-        public bool IsPostsPage =>
-            this.PageLink.StartsWith(YanderePage.PostsPageLink) &&
-            !this.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
-
-        /// <summary>
-        /// 指示当前页面是否为 Pools 页面。
-        /// </summary>
-        public bool IsPoolsPage =>
-            this.PageLink.StartsWith(YanderePage.PoolsPageLink) &&
-            !this.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
-
-        /// <summary>
-        /// 指示当前页面是否为 Post 页面。
-        /// </summary>
-        public bool IsPostPage =>
-            this.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
-
-        /// <summary>
-        /// 指示当前页面是否为 Pool 页面。
-        /// </summary>
-        public bool IsPoolPage =>
-            this.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
         /// <summary>
         /// 页面包含的图片链接。
@@ -401,30 +356,51 @@ namespace YandereSpider
             (this.NextPageLink is null) ? null : new YanderePage(this.NextPageLink);
 
         /// <summary>
-        /// 检查指定的字符串是否不为 <see langword="null"/> 或空字符串 <see cref="string.Empty"/>
-        /// 或仅由空白字符（参见 <see cref="char.IsWhiteSpace(char)"/>）组成。
+        /// 指示页面是否为 yande.re 的页面。
         /// </summary>
-        /// <param name="source">要检查的字符串。</param>
-        /// <param name="paramName">参数名称，一般使用 <see langword="nameof"/> 获取。</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="source"/> 为 <see langword="null"/>。</exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="source"/> 为空字符串或全为空白字符。</exception>
-        private static void CheckNotNullOrWhitespace(string source, string paramName = null)
-        {
-            if (source is null)
-            {
-                throw new ArgumentNullException(paramName);
-            }
-            else if (string.IsNullOrEmpty(source))
-            {
-                throw new ArgumentException("IsEmpty", paramName);
-            }
-            else if (string.IsNullOrWhiteSpace(source))
-            {
-                throw new ArgumentException("IsWhitespace", paramName);
-            }
-        }
+        /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
+        /// <returns>若 <paramref name="page"/> 为 yande.re 的页面，
+        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
+        public static bool IsYanderePage(YanderePage page) =>
+            page.PageLink.StartsWith(YanderePage.IndexPageLink);
+
+        /// <summary>
+        /// 指示页面是否为 Posts 页面。
+        /// </summary>
+        /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
+        /// <returns>若 <paramref name="page"/> 为 Posts 页面，
+        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
+        public static bool IsPostsPage(YanderePage page) =>
+            page.PageLink.StartsWith(YanderePage.PostsPageLink) &&
+            !page.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
+
+        /// <summary>
+        /// 指示页面是否为 Pools 页面。
+        /// </summary>
+        /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
+        /// <returns>若 <paramref name="page"/> 为 Pools 页面，
+        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
+        public static bool IsPoolsPage(YanderePage page) =>
+            page.PageLink.StartsWith(YanderePage.PoolsPageLink) &&
+            !page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
+
+        /// <summary>
+        /// 指示页面是否为 Post 页面。
+        /// </summary>
+        /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
+        /// <returns>若 <paramref name="page"/> 为 Post 页面，
+        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
+        public static bool IsPostPage(YanderePage page) =>
+            page.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
+
+        /// <summary>
+        /// 指示页面是否为 Pool 页面。
+        /// </summary>
+        /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
+        /// <returns>若 <paramref name="page"/> 为 Pool 页面，
+        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
+        public static bool IsPoolPage(YanderePage page) =>
+            page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
         /// <summary>
         /// 指示当前实例与指定 <see cref="YanderePage"/> 对象是否相等。

@@ -7,12 +7,12 @@ using System.Windows;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("YandereSpider")]
-[assembly: AssemblyDescription("yande.re Image Link Extractor")]
+[assembly: AssemblyTitle("yande.re 链接提取")]
+[assembly: AssemblyDescription("YandereSpider.exe")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("XstarS")]
-[assembly: AssemblyProduct("YandereSpider")]
-[assembly: AssemblyCopyright("Copyright © XstarS 2018")]
+[assembly: AssemblyCompany("天南十字星")]
+[assembly: AssemblyProduct("yande.re 链接提取")]
+[assembly: AssemblyCopyright("Copyright © 天南十字星 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

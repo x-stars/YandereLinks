@@ -25,7 +25,10 @@ namespace XstarS.Windows.Controls
         /// <paramref name="source"/> 为 <see langword="null"/>。</exception>
         public static void SuppressScriptErrors(this WebBrowser source, bool supresses = true)
         {
-            source.CheckNotNull(nameof(source));
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
 
             var innerComWebBrowserFiledInfo = typeof(WebBrowser).GetField(
                 "_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -50,9 +53,12 @@ namespace XstarS.Windows.Controls
         /// 程序没有足够的权限读取注册表。</exception>
         public static int? GetInternetExplorerVersion(this WebBrowser source)
         {
-            source.CheckNotNull(nameof(source));
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
 
-            const string ieRegKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer";
+            string ieRegKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer";
             string versionSz = (Registry.GetValue(ieRegKey, "svcVersion", null) ??
                 Registry.GetValue(ieRegKey, "Version", null)) as string;
             string mainVersionSz = versionSz?.Split('.')[0];
@@ -71,9 +77,12 @@ namespace XstarS.Windows.Controls
         /// 程序没有足够的权限读取注册表。</exception>
         public static int? GetVersion(this WebBrowser source)
         {
-            source.CheckNotNull(nameof(source));
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
 
-            const string featureControlRegKey =
+            string featureControlRegKey =
                 @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\" +
                 @"MAIN\FeatureControl\FEATURE_BROWSER_EMULATION";
             string appName = AppDomain.CurrentDomain.FriendlyName;
@@ -94,10 +103,16 @@ namespace XstarS.Windows.Controls
         /// 程序没有足够的权限修改注册表。</exception>
         public static void SetVersion(this WebBrowser source, int version)
         {
-            source.CheckNotNull(nameof(source));
-            version.CheckInRange(7, 11, nameof(source));
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if ((version < 7) || (version > 11))
+            {
+                throw new ArgumentOutOfRangeException(nameof(version));
+            }
 
-            const string featureControlRegKey =
+            string featureControlRegKey =
                 @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\" + 
                 @"MAIN\FeatureControl\FEATURE_BROWSER_EMULATION";
             string appName = AppDomain.CurrentDomain.FriendlyName;
