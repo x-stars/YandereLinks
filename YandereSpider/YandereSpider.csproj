@@ -61,7 +61,6 @@
     <Compile Include="BindingBase\Bindable.cs" />
     <Compile Include="BindingBase\BindableObject.cs" />
     <Compile Include="Helpers\ControlHelper.cs" />
-    <Compile Include="Helpers\ArgumentCheckHelper.cs" />
     <Compile Include="YanderePage.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

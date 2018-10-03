@@ -26,13 +26,13 @@ namespace XstarS.ComponentModel
         /// <summary>
         /// 使用默认值初始化 <see cref="Bindable{T}"/> 类的新实例。
         /// </summary>
-        public Bindable() : base() => this.value = default(T);
+        public Bindable() => this.value = default(T);
 
         /// <summary>
         /// 使用指定的值初始化 <see cref="Bindable{T}"/> 类的新实例。
         /// </summary>
         /// <param name="value">一个 <typeparamref name="T"/> 类型的对象。</param>
-        public Bindable(T value) : base() => this.value = value;
+        public Bindable(T value) => this.value = value;
 
         /// <summary>
         /// 当前 <see cref="Bindable{T}"/> 实例用于数据绑定的值。
@@ -48,17 +48,6 @@ namespace XstarS.ComponentModel
         }
 
         /// <summary>
-        /// 返回一个值，该值指示此实例和指定的 <see cref="Bindable{T}"/> 对象是否表示相同的值。
-        /// </summary>
-        /// <param name="other">要与此实例比较的 <see cref="Bindable{T}"/> 对象。</param>
-        /// <returns>
-        /// 如果此实例和 <paramref name="other"/> 的 <see cref="Bindable{T}.Value"/> 属性相等，
-        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。
-        /// </returns>
-        public bool Equals(Bindable<T> other) =>
-            !(other is null) && EqualityComparer<T>.Default.Equals(this.value, other.value);
-
-        /// <summary>
         /// 返回一个值，该值指示此实例和指定的对象是否表示相同的值。
         /// </summary>
         /// <param name="obj">要与此实例比较的对象。</param>
@@ -67,8 +56,7 @@ namespace XstarS.ComponentModel
         /// 且 <see cref="Bindable{T}.Value"/> 属性相等，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。
         /// </returns>
-        public override bool Equals(object obj) =>
-            this.Equals(obj as Bindable<T>);
+        public override bool Equals(object obj) => this.Equals(obj as Bindable<T>);
 
         /// <summary>
         /// 返回此实例的哈希代码。
@@ -82,6 +70,17 @@ namespace XstarS.ComponentModel
         /// </summary>
         /// <returns><see cref="Bindable{T}.Value"/> 的等效字符串表达形式。</returns>
         public override string ToString() => this.value.ToString();
+
+        /// <summary>
+        /// 返回一个值，该值指示此实例和指定的 <see cref="Bindable{T}"/> 对象是否表示相同的值。
+        /// </summary>
+        /// <param name="other">要与此实例比较的 <see cref="Bindable{T}"/> 对象。</param>
+        /// <returns>
+        /// 如果此实例和 <paramref name="other"/> 的 <see cref="Bindable{T}.Value"/> 属性相等，
+        /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。
+        /// </returns>
+        public bool Equals(Bindable<T> other) =>
+            !(other is null) && EqualityComparer<T>.Default.Equals(this.value, other.value);
 
         /// <summary>
         /// 指示两 <see cref="Bindable{T}"/> 对象是否相等。
