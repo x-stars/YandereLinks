@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace YandereSpider
@@ -12,27 +13,26 @@ namespace YandereSpider
     /// <summary>
     /// 提供获取 yande.re 页面的内含链接的方法。
     /// </summary>
-    public class YanderePage : IReadOnlyList<YanderePage>, IEquatable<YanderePage>
+    public class YanderePage : IDisposable, IReadOnlyList<YanderePage>, IEquatable<YanderePage>
     {
         /// <summary>
-        /// yande.re 首页链接。
-        /// 默认跳转到 Posts 页面。
+        /// yande.re 首页链接，默认跳转到 Posts 页面。
         /// </summary>
         public static readonly string IndexPageLink;
         /// <summary>
-        /// yande.re Posts 页面链接。
+        /// Posts 页面链接。
         /// </summary>
         public static readonly string PostsPageLink;
         /// <summary>
-        /// yande.re Pools 页面链接。
+        /// Pools 页面链接。
         /// </summary>
         public static readonly string PoolsPageLink;
         /// <summary>
-        /// yande.re Post 页面链接的静态部分。
+        /// Post 页面链接的静态部分。
         /// </summary>
         protected static readonly string PostPageLinkStatic;
         /// <summary>
-        /// yande.re Pool 页面链接的静态部分。
+        /// Pool 页面链接的静态部分。
         /// </summary>
         protected static readonly string PoolPageLinkStatic;
         /// <summary>
@@ -53,9 +53,13 @@ namespace YandereSpider
         protected static readonly string NextPageLinkPrefix;
 
         /// <summary>
-        /// 创建 HTML 文本的任务。
+        /// 获取 HTML 文本的任务。
         /// </summary>
         private Task<string> documentTextTask;
+        /// <summary>
+        /// 获取 HTML 文本的任务的取消标志信号源。
+        /// </summary>
+        private CancellationTokenSource documentCancellation;
 
         /// <summary>
         /// 初始化 <see cref="YanderePage"/> 类的静态成员。
@@ -72,6 +76,11 @@ namespace YandereSpider
             YanderePage.PrevPageLinkPrefix = "<a class=\"previous_page\" rel=\"prev\" href=\"";
             YanderePage.NextPageLinkPrefix = "<a class=\"next_page\" rel=\"next\" href=\"";
         }
+
+        /// <summary>
+        /// 使用 yande.re 首页的链接初始化 <see cref="YanderePage"/> 类的新实例。
+        /// </summary>
+        public YanderePage() : this(YanderePage.IndexPageLink) { }
 
         /// <summary>
         /// 使用页面的链接初始化 <see cref="YanderePage"/> 类的新实例。
@@ -94,7 +103,7 @@ namespace YandereSpider
             {
                 throw new ArgumentNullException(nameof(documentText));
             }
-            
+
             this.documentTextTask = new Task<string>(() => documentText);
             this.documentTextTask.Start();
         }
@@ -125,26 +134,32 @@ namespace YandereSpider
         }
 
         /// <summary>
-        /// 获取当前页面能够直接导航的指定索引的页面。
+        /// 获取当前页面能够直接导航的页面中指定索引处的页面。
         /// </summary>
-        /// <param name="index">页面的索引，
-        /// 应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
-        /// <returns>当前页面能够直接导航的指定索引的页面。</returns>
+        /// <param name="index">页面的索引，0 代表当前页面；
+        /// 除此之外的索引应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
+        /// <returns>当前页面能够直接导航的页面中指定索引处的页面，
+        /// <paramref name="index"/> 为 0 时则为当前页面。</returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="index"/> 超出允许的范围。</exception>
         public YanderePage this[int index]
         {
             get
             {
-                if ((index < 1) || (index > this.Count))
+                if ((index < 0) || (index > this.Count))
                 {
                     throw new IndexOutOfRangeException();
+                }
+                else if (index == 0)
+                {
+                    return this;
                 }
 
                 string pageIndexPrefix = "page=";
                 string pageLink = (this.PageLink == YanderePage.IndexPageLink) ?
                     YanderePage.PostsPageLink : this.PageLink;
-                string newPageLink;
+
+                string indexPageLink;
                 if (pageLink.Contains(pageIndexPrefix))
                 {
                     int pageIndexLength = 0;
@@ -157,15 +172,15 @@ namespace YandereSpider
                         }
                         else { break; }
                     }
-                    newPageLink = pageLink.Remove(startIndex, pageIndexLength).
+                    indexPageLink = pageLink.Remove(startIndex, pageIndexLength).
                         Insert(startIndex, index.ToString());
                 }
                 else
                 {
                     string paramModifier = pageLink.Contains("?") ? "&" : "?";
-                    newPageLink = pageLink + paramModifier + pageIndexPrefix + index.ToString();
+                    indexPageLink = pageLink + paramModifier + pageIndexPrefix + index.ToString();
                 }
-                return new YanderePage(newPageLink);
+                return new YanderePage(indexPageLink);
             }
         }
 
@@ -185,12 +200,19 @@ namespace YandereSpider
 
                 try
                 {
+                    this.documentCancellation = new CancellationTokenSource();
+                    this.documentTextTask.Wait(this.documentCancellation.Token);
                     return this.documentTextTask.Result;
+                }
+                catch (OperationCanceledException)
+                {
+                    this.documentTextTask = null;
+                    this.documentCancellation = null;
+                    return string.Empty;
                 }
                 catch (Exception)
                 {
-                    this.documentTextTask =
-                        new HttpClient().GetStringAsync(this.PageLink);
+                    this.Refresh();
                     return this.DocumentText;
                 }
             }
@@ -205,6 +227,7 @@ namespace YandereSpider
             {
                 string pageIndexPrefix = "page=";
                 string pageLink = this.PageLink;
+
                 if (!pageLink.Contains(pageIndexPrefix)) { return 1; }
 
                 string pageIndexString = string.Empty;
@@ -229,6 +252,7 @@ namespace YandereSpider
             get
             {
                 string documentText = this.DocumentText;
+
                 if (!documentText.Contains(YanderePage.NextPageLinkPrefix))
                 {
                     return documentText.Contains(YanderePage.PrevPageLinkPrefix) ?
@@ -257,6 +281,7 @@ namespace YandereSpider
             get
             {
                 string documentText = this.DocumentText;
+
                 var imageLinks = new List<string>();
                 while (documentText.Contains(YanderePage.ImageLinkPrefix))
                 {
@@ -279,6 +304,7 @@ namespace YandereSpider
             get
             {
                 string documentText = this.DocumentText;
+
                 var poolPageLinks = new List<string>();
                 while (documentText.Contains(YanderePage.PoolPageLinkPrefix))
                 {
@@ -317,7 +343,9 @@ namespace YandereSpider
             get
             {
                 string documentText = this.DocumentText;
+
                 if (!documentText.Contains(YanderePage.PrevPageLinkPrefix)) { return null; }
+
                 int startIndex = documentText.IndexOf(YanderePage.PrevPageLinkPrefix) +
                     YanderePage.PrevPageLinkPrefix.Length;
                 string prevPageLink = documentText.Substring(startIndex);
@@ -340,7 +368,9 @@ namespace YandereSpider
             get
             {
                 string documentText = this.DocumentText;
+
                 if (!documentText.Contains(YanderePage.NextPageLinkPrefix)) { return null; }
+
                 int startIndex = documentText.IndexOf(YanderePage.NextPageLinkPrefix) +
                     YanderePage.NextPageLinkPrefix.Length;
                 string nextPageLink = documentText.Substring(startIndex);
@@ -403,6 +433,17 @@ namespace YandereSpider
             page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
         /// <summary>
+        /// 重新获取当前页面的 HTML 文本以刷新内容。
+        /// </summary>
+        public virtual void Refresh() =>
+            this.documentTextTask = new HttpClient().GetStringAsync(this.PageLink);
+
+        /// <summary>
+        /// 立刻停止所有 HTTP 传输任务，并释放此实例占用的资源。
+        /// </summary>
+        public virtual void Dispose() => this.documentCancellation?.Cancel();
+
+        /// <summary>
         /// 指示当前实例与指定 <see cref="YanderePage"/> 对象是否相等。
         /// </summary>
         /// <param name="other">用于比较的 <see cref="YanderePage"/> 对象。</param>
@@ -411,7 +452,7 @@ namespace YandereSpider
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。
         /// </returns>
         public bool Equals(YanderePage other) =>
-            !(other is null) && this.PageLink == other.PageLink;
+            !(other is null) && (this.PageLink == other.PageLink);
 
         /// <summary>
         /// 指示当前实例与指定对象是否相等。
@@ -443,11 +484,9 @@ namespace YandereSpider
         /// <returns>用于循环访问页面的枚举数。</returns>
         public IEnumerator<YanderePage> GetEnumerator()
         {
-            var page = this;
-            while (!(page is null))
+            for (var page = this; !(page is null); page = page.NextPage)
             {
                 yield return page;
-                page = page.NextPage;
             }
         }
 
