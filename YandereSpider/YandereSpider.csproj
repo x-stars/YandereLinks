@@ -60,7 +60,11 @@
     </ApplicationDefinition>
     <Compile Include="BindingBase\Bindable.cs" />
     <Compile Include="BindingBase\BindableObject.cs" />
-    <Compile Include="Helpers\ControlHelper.cs" />
+    <Compile Include="ConsoleWindow.cs" />
+    <Compile Include="Helpers\ConsoleManager.cs" />
+    <Compile Include="Helpers\ControlExtensions.cs" />
+    <Compile Include="Helpers\ParamReader.cs" />
+    <Compile Include="Helpers\SystemComponents.cs" />
     <Compile Include="YanderePage.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

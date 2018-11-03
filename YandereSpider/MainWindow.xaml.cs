@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using XstarS.ComponentModel;
+using XstarS.Win32;
 using XstarS.Windows.Controls;
 
 namespace YandereSpider
@@ -36,11 +37,11 @@ namespace YandereSpider
         /// <summary>
         /// 提取链接的后台线程。
         /// </summary>
-        private BackgroundWorker extractLinkWorker;
+        private readonly BackgroundWorker extractLinkWorker;
         /// <summary>
         /// 遍历页面的后台线程。
         /// </summary>
-        private BackgroundWorker enumeratePageWorker;
+        private readonly BackgroundWorker enumeratePageWorker;
 
         /// <summary>
         /// 初始化 <see cref="MainWindow"/> 的新实例。
@@ -54,13 +55,19 @@ namespace YandereSpider
             this.ImageLinks = string.Empty;
 
             this.extractLinkWorker = new BackgroundWorker()
-            { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
             this.extractLinkWorker.DoWork += this.ExtractLinkWorker_DoWork;
             this.extractLinkWorker.ProgressChanged += this.ExtractLinkWorker_ProgressChanged;
             this.extractLinkWorker.RunWorkerCompleted += this.ExtractLinkWorker_RunWorkerCompleted;
 
             this.enumeratePageWorker = new BackgroundWorker()
-            { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
+            {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
             this.enumeratePageWorker.DoWork += this.EnumeratePageWorker_DoWork;
             this.enumeratePageWorker.ProgressChanged += this.EnumeratePageWorker_ProgressChanged;
             this.enumeratePageWorker.RunWorkerCompleted += this.EnumeratePageWorker_RunWorkerCompleted;
@@ -95,7 +102,6 @@ namespace YandereSpider
         public string PageLink
         {
             get => this.pageLink;
-
             set
             {
                 this.pageLink = value;
@@ -124,10 +130,10 @@ namespace YandereSpider
         {
             try
             {
-                int? destVersion = this.webBrowser.GetInternetExplorerVersion();
-                int? currVersion = this.webBrowser.GetVersion();
+                int? destVersion = SystemComponents.GetInternetExplorerVersion();
+                int? currVersion = SystemComponents.GetWebBrowserVersion();
                 if ((currVersion is null) || (currVersion < destVersion))
-                { this.webBrowser.SetVersion((int)destVersion); }
+                { SystemComponents.SetWebBrowserVersion((int)destVersion); }
             }
             catch (SecurityException)
             {
@@ -230,7 +236,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void ExtractButton_Click(object sender, RoutedEventArgs e)
         {
-            const string cancelButtonContent = "取消";
+            string cancelButtonContent = "取消";
             if ((this.extractButton.Content as string) != cancelButtonContent)
             {
                 this.enumerateButton.IsEnabled = false;
@@ -241,6 +247,8 @@ namespace YandereSpider
             else
             {
                 this.extractLinkWorker.CancelAsync();
+                this.yanderePage.Dispose();
+                this.yanderePage = new YanderePage(this.PageLink);
             }
         }
 
@@ -251,7 +259,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void EnumerateButton_Click(object sender, RoutedEventArgs e)
         {
-            const string cancelButtonContent = "取消";
+            string cancelButtonContent = "取消";
             if (this.enumerateButton.Content as string != cancelButtonContent)
             {
                 this.extractButton.IsEnabled = false;
@@ -262,6 +270,8 @@ namespace YandereSpider
             else
             {
                 this.enumeratePageWorker.CancelAsync();
+                this.yanderePage.Dispose();
+                this.yanderePage = new YanderePage(this.PageLink);
             }
         }
 
@@ -302,6 +312,8 @@ namespace YandereSpider
                 foreach (var poolPage in page.PoolPages)
                 {
                     if (this.extractLinkWorker.CancellationPending) { return; }
+
+                    this.yanderePage = poolPage;
 
                     foreach (var imageLink in poolPage.ImageLinks)
                     {
@@ -363,12 +375,15 @@ namespace YandereSpider
 
                 this.BindingPageLink.Value = page.PageLink;
                 this.enumeratePageWorker.ReportProgress(0);
+                this.yanderePage = page;
 
                 if (YanderePage.IsPoolsPage(page))
                 {
                     foreach (var poolPage in page.PoolPages)
                     {
                         if (this.enumeratePageWorker.CancellationPending) { return; }
+
+                        this.yanderePage = poolPage;
 
                         foreach (var imageLink in poolPage.ImageLinks)
                         {
