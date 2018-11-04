@@ -50,6 +50,8 @@ namespace XstarS.Win32
         /// <param name="version">Internet Explorer 的版本号，应介于 7 和 11。</param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="version"/> 不在 7 和 11 之间。</exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// 程序无法以写访问权限打开注册表项。</exception>
         /// <exception cref="SecurityException">
         /// 程序没有足够的权限修改注册表。</exception>
         public static void SetWebBrowserVersion(int version)

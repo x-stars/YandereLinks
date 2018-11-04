@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,15 +11,22 @@ using XstarS;
 namespace YandereSpider
 {
     /// <summary>
-    /// 控制台模式的交互逻辑。
+    /// 控制台模式的运行逻辑。
     /// </summary>
     public static class ConsoleWindow
     {
         /// <summary>
+        /// 全局线程同步锁。
+        /// </summary>
+        private static readonly object SyncRoot = new object();
+        /// <summary>
         /// 当前正在工作的后台线程的数量。
         /// </summary>
-        private static int WorkingThreadCount = -1;
-
+        private static int WorkingThreads = -1;
+        /// <summary>
+        /// 图片链接输出文件的路径。
+        /// </summary>
+        private static string OutFile = null;
         /// <summary>
         /// 所有图片的链接。
         /// </summary>
@@ -27,42 +35,11 @@ namespace YandereSpider
         /// <summary>
         /// 显示控制台窗口，并传递程序启动参数。
         /// </summary>
-        /// <param name="args">程序启动参数。</param>
+        /// <param name="args">程序的启动参数。</param>
         public static void Show(string[] args)
         {
             ConsoleManager.Show();
-            var param = new ParamReader(args, true, new[] { "-e", "-t" }, new[] { "-h" });
-
-            if (param.GetSwitch("-h"))
-            {
-                ConsoleWindow.ShowHelp();
-            }
-            else
-            {
-                var page = new YanderePage(param.GetParam(0) ?? YanderePage.IndexPageLink);
-                if (!YanderePage.IsYanderePage(page))
-                {
-                    throw new ArgumentException(new ArgumentException().Message, "PageLink");
-                }
-
-                int enumCount = int.Parse(param.GetParam("-e") ?? 0.ToString());
-
-                if (!(param.GetParam("-t") is null))
-                {
-                    int maxThreads = int.Parse(param.GetParam("-t"));
-                    if (maxThreads < 1) { throw new ArgumentOutOfRangeException("-t MaxThreads"); }
-                    ThreadPool.SetMaxThreads(maxThreads, maxThreads);
-                }
-
-                if (enumCount == 0) { ConsoleWindow.ExtractPage(page); }
-                else { ConsoleWindow.EnumeratePages(page, enumCount); }
-
-                while (ConsoleWindow.WorkingThreadCount != 0) { Thread.Sleep(10); }
-                Clipboard.SetText(string.Join(Environment.NewLine, ConsoleWindow.ImageLinks));
-                Console.WriteLine();
-                Console.WriteLine("Completed.");
-                Console.ReadKey();
-            }
+            ConsoleWindow.Run(args);
         }
 
         /// <summary>
@@ -74,41 +51,148 @@ namespace YandereSpider
         }
 
         /// <summary>
+        /// 控制台模式的主要过程。
+        /// </summary>
+        /// <param name="args">程序的启动参数。</param>
+        private static void Run(string[] args)
+        {
+            var param = new ParamReader(args, true, new[] { "-e", "-t", "-o" }, new[] { "-h" });
+            if (param.GetSwitch("-h"))
+            {
+                ConsoleWindow.ShowHelp();
+            }
+            else
+            {
+                var pages = new List<YanderePage>();
+                for (int i = 0; i <= ushort.MaxValue; i++)
+                {
+                    var pageLink = param.GetParam(i);
+                    if (pageLink is null) { break; }
+                    pageLink = ConsoleWindow.FormatPageLink(pageLink);
+                    var page = new YanderePage(pageLink);
+                    if (!YanderePage.IsYanderePage(page))
+                    {
+                        throw new ArgumentException(new ArgumentException().Message, "PageLink");
+                    }
+                    pages.Add(page);
+                }
+                if (pages.Count == 0) { pages.Add(new YanderePage(YanderePage.IndexPageLink)); }
+
+                int enumCount = int.Parse(param.GetParam("-e") ?? 0.ToString());
+
+                if (!(param.GetParam("-t") is null))
+                {
+                    int maxThreads = int.Parse(param.GetParam("-t"));
+                    if (maxThreads < 1)
+                    {
+                        throw new ArgumentOutOfRangeException("-t MaxThreads");
+                    }
+                    ThreadPool.SetMaxThreads(maxThreads, maxThreads);
+                }
+
+                if (!(param.GetParam("-o") is null))
+                {
+                    ConsoleWindow.OutFile = Path.GetFullPath(param.GetParam("-o"));
+                    if (!Directory.Exists(Path.GetDirectoryName(ConsoleWindow.OutFile)))
+                    {
+                        throw new DirectoryNotFoundException();
+                    }
+                }
+
+                foreach (var page in pages)
+                {
+                    if (enumCount == 0) { ConsoleWindow.ExtractPage(page); }
+                    else { ConsoleWindow.EnumeratePages(page, enumCount); }
+                }
+
+                while (ConsoleWindow.WorkingThreads != 0) { Thread.Sleep(10); }
+
+                if (ConsoleWindow.ImageLinks.Count <= ushort.MaxValue)
+                {
+                    Clipboard.SetText(string.Join(Environment.NewLine, ConsoleWindow.ImageLinks));
+                }
+
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Complete);
+                Console.ReadKey();
+            }
+        }
+
+        /// <summary>
+        /// 格式化输入的 yande.re 页面链接。
+        /// </summary>
+        /// <param name="pageLink">一个 yande.re 页面链接。</param>
+        /// <returns>格式化完成的 yande.re 页面链接。</returns>
+        private static string FormatPageLink(string pageLink)
+        {
+            var indexPageUri = new Uri(YanderePage.IndexPageLink);
+            var yandereHost = indexPageUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped);
+
+            if (pageLink.StartsWith(yandereHost))
+            {
+                return Uri.UriSchemeHttps + Uri.SchemeDelimiter + pageLink;
+            }
+            else if (pageLink.StartsWith(Uri.UriSchemeHttp + Uri.SchemeDelimiter + yandereHost))
+            {
+                return pageLink.Replace(Uri.UriSchemeHttp, Uri.UriSchemeHttps);
+            }
+            else { return pageLink; }
+        }
+
+        /// <summary>
         /// 将帮助信息输出到控制台。
         /// </summary>
         private static void ShowHelp()
         {
-            Console.WriteLine(@"
-YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-h]
-
-    PageLink        URL of yande.re page which contains image links.
-                    Absolute URL only, should start with 'https://yande.re'.
-    -e PageCount    Count of pages you want to enumerate from input page.
-                    0 means no enumeration, -1 means enumerating to end.
-    -t MaxThreads   The maximum threads in HTTP access.
-    -h              Show this help message.
-");
+            Console.WriteLine();
+            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_Usage);
+            Console.WriteLine();
+            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_PageLink);
+            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_PageCount);
+            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_MaxThreads);
+            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_OutFile);
+            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_Help);
+            Console.WriteLine();
         }
 
         /// <summary>
         /// 提取页面中包含的图片链接。
         /// </summary>
-        /// <param name="page"></param>
+        /// <param name="page">页面连接提取对象。</param>
         private static void ExtarctLinks(YanderePage page)
         {
-            if (ConsoleWindow.WorkingThreadCount == -1)
+            lock (ConsoleWindow.SyncRoot)
             {
-                ConsoleWindow.WorkingThreadCount = 0;
+                if (ConsoleWindow.WorkingThreads == -1)
+                {
+                    ConsoleWindow.WorkingThreads = 0;
+                }
+
+                ConsoleWindow.WorkingThreads++;
             }
 
-            ConsoleWindow.WorkingThreadCount++;
             var imageLinks = page.ImageLinks;
-            Console.WriteLine(string.Join(Environment.NewLine, imageLinks));
-            foreach (var imageLink in imageLinks)
+
+            lock (ConsoleWindow.SyncRoot)
             {
-                ConsoleWindow.ImageLinks.Add(imageLink);
+                Console.WriteLine(string.Join(Environment.NewLine, imageLinks));
+
+                if (!(ConsoleWindow.OutFile is null))
+                {
+                    using (var outFile = new StreamWriter(ConsoleWindow.OutFile, true))
+                    {
+                        outFile.WriteLine(string.Join(Environment.NewLine, imageLinks));
+                    }
+                }
+
+                foreach (var imageLink in imageLinks)
+                {
+                    ConsoleWindow.ImageLinks.Add(imageLink);
+                }
+
+                ConsoleWindow.WorkingThreads--;
             }
-            ConsoleWindow.WorkingThreadCount--;
         }
 
         /// <summary>

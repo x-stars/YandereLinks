@@ -22,7 +22,7 @@ using XstarS.Windows.Controls;
 namespace YandereSpider
 {
     /// <summary>
-    /// MainWindow.xaml 的交互逻辑
+    /// MainWindow.xaml 的交互逻辑。
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -51,7 +51,7 @@ namespace YandereSpider
             this.pageLink = string.Empty;
             this.BindingPageLink = string.Empty;
             this.WebBrowserCanGoBack = false;
-            this.WebBrowserCanGoForward = true;
+            this.WebBrowserCanGoForward = false;
             this.ImageLinks = string.Empty;
 
             this.extractLinkWorker = new BackgroundWorker()
@@ -132,10 +132,14 @@ namespace YandereSpider
             {
                 int? destVersion = SystemComponents.GetInternetExplorerVersion();
                 int? currVersion = SystemComponents.GetWebBrowserVersion();
+
                 if ((currVersion is null) || (currVersion < destVersion))
-                { SystemComponents.SetWebBrowserVersion((int)destVersion); }
+                {
+                    SystemComponents.SetWebBrowserVersion((int)destVersion);
+                }
             }
-            catch (SecurityException)
+            catch (Exception ex)
+            when ((ex is UnauthorizedAccessException) || (ex is SecurityException))
             {
                 var appDomain = AppDomain.CurrentDomain;
                 string appPath = appDomain.BaseDirectory + appDomain.FriendlyName;
@@ -144,7 +148,7 @@ namespace YandereSpider
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.GetType().ToString() + Environment.NewLine + ex.Message);
             }
 
             this.webBrowser.SuppressScriptErrors();
@@ -161,9 +165,14 @@ namespace YandereSpider
             if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) ==
                 ModifierKeys.Control)
             {
-                if (e.Key == Key.E) { this.ExtractButton_Click(this, new RoutedEventArgs()); }
-                if (e.Key == Key.C) { this.CopyButton_Click(this, new RoutedEventArgs()); }
-                if (e.Key == Key.X) { this.ClearButton_Click(this, new RoutedEventArgs()); }
+                switch (e.Key)
+                {
+                    case Key.E: this.ExtractButton_Click(this, new RoutedEventArgs()); break;
+                    case Key.R: this.EnumerateButton_Click(this, new RoutedEventArgs()); break;
+                    case Key.C: this.CopyButton_Click(this, new RoutedEventArgs()); break;
+                    case Key.X: this.ClearButton_Click(this, new RoutedEventArgs()); break;
+                    default: break;
+                }
             }
         }
 
@@ -236,7 +245,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void ExtractButton_Click(object sender, RoutedEventArgs e)
         {
-            string cancelButtonContent = "取消";
+            string cancelButtonContent = Properties.LocalizedResources.MainWindow_CancelButton;
             if ((this.extractButton.Content as string) != cancelButtonContent)
             {
                 this.enumerateButton.IsEnabled = false;
@@ -259,7 +268,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void EnumerateButton_Click(object sender, RoutedEventArgs e)
         {
-            string cancelButtonContent = "取消";
+            string cancelButtonContent = Properties.LocalizedResources.MainWindow_CancelButton;
             if (this.enumerateButton.Content as string != cancelButtonContent)
             {
                 this.extractButton.IsEnabled = false;

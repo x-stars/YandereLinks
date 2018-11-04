@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YandereSpider"
+        xmlns:props="clr-namespace:YandereSpider.Properties"
         mc:Ignorable="d"
-        Title="yande.re 链接提取" Height="720" Width="1280" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen" Loaded="MainWindow_Loaded" KeyDown="MainWindow_KeyDown">
+        Title="{x:Static props:LocalizedResources.MainWindow_Title}" Height="720" Width="1280" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen" Loaded="MainWindow_Loaded" KeyDown="MainWindow_KeyDown" Icon="Properties/YandereSpider.ico">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="130"/>
@@ -25,9 +26,9 @@
         <Button Content="→" Grid.Column="1" HorizontalAlignment="Right" Margin="0,5,5,5" Height="35" Width="35" FontSize="16" Click="GoToButton_Click"/>
         <TextBox x:Name="addressTextBox" Grid.ColumnSpan="3" Margin="130,5,50,5" VerticalContentAlignment="Center" TextWrapping="NoWrap" FontSize="16" Text="{Binding BindingPageLink.Value, ElementName=mainWindow, Mode=OneWay}" KeyDown="AddressTextBox_KeyDown"/>
         <TextBox Grid.Row="3" Grid.Column="1" TextWrapping="NoWrap" Text="{Binding ImageLinks.Value, ElementName=mainWindow}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.RowSpan="3" IsReadOnly="True"/>
-        <Button x:Name="extractButton" Content="提取链接" Margin="5,5,5,0" Height="30" Grid.Row="3" VerticalAlignment="Top" Click="ExtractButton_Click"/>
-        <Button x:Name="enumerateButton" Content="遍历页面" Margin="5,40,5,0" Height="30" Grid.Row="3" VerticalAlignment="Top" Click="EnumerateButton_Click"/>
-        <Button Content="复制到剪贴板" Margin="5,0,5,40" Height="30" Grid.Row="3" VerticalAlignment="Bottom" Click="CopyButton_Click"/>
-        <Button Content="清除" Margin="5,0,5,5" Height="30" Grid.Row="3" VerticalAlignment="Bottom" Click="ClearButton_Click"/>
+        <Button x:Name="extractButton" Content="{x:Static props:LocalizedResources.MainWindow_ExtractButton}" Margin="5,5,5,0" Height="30" Grid.Row="3" VerticalAlignment="Top" Click="ExtractButton_Click"/>
+        <Button x:Name="enumerateButton" Content="{x:Static props:LocalizedResources.MainWindow_EnumerateButton}" Margin="5,40,5,0" Height="30" Grid.Row="3" VerticalAlignment="Top" Click="EnumerateButton_Click"/>
+        <Button Content="{x:Static props:LocalizedResources.MainWindow_CopyButton}" Margin="5,0,5,40" Height="30" Grid.Row="3" VerticalAlignment="Bottom" Click="CopyButton_Click"/>
+        <Button Content="{x:Static props:LocalizedResources.MainWindow_ClearButton}" Margin="5,0,5,5" Height="30" Grid.Row="3" VerticalAlignment="Bottom" Click="ClearButton_Click"/>
     </Grid>
 </Window>

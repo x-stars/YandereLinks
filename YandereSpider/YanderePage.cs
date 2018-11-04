@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace YandereSpider
@@ -13,6 +9,7 @@ namespace YandereSpider
     /// <summary>
     /// 提供获取 yande.re 页面的内含链接的方法。
     /// </summary>
+    /// <remarks>为设计方便，在初始化之外不抛出任何异常。</remarks>
     public class YanderePage : IDisposable, IReadOnlyList<YanderePage>, IEquatable<YanderePage>
     {
         /// <summary>
@@ -53,13 +50,13 @@ namespace YandereSpider
         protected static readonly string NextPageLinkPrefix;
 
         /// <summary>
+        /// 用于 HTTP 访问的客户端对象。
+        /// </summary>
+        private HttpClient httpClient;
+        /// <summary>
         /// 获取 HTML 文本的任务。
         /// </summary>
         private Task<string> documentTextTask;
-        /// <summary>
-        /// 获取 HTML 文本的任务的取消标志信号源。
-        /// </summary>
-        private CancellationTokenSource documentCancellation;
 
         /// <summary>
         /// 初始化 <see cref="YanderePage"/> 类的静态成员。
@@ -88,6 +85,8 @@ namespace YandereSpider
         /// <param name="pageLink">页面的链接。</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="pageLink"/> 为 <see langword="null"/>。</exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="pageLink"/> 不为合法的绝对 URI。</exception>
         public YanderePage(string pageLink) : this(pageLink, true) { }
 
         /// <summary>
@@ -97,6 +96,8 @@ namespace YandereSpider
         /// <param name="documentText">页面的 HTML 文本。</param>
         /// <exception cref="ArgumentNullException"><paramref name="pageLink"/> 或
         /// <paramref name="documentText"/> 为 <see langword="null"/>。</exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="pageLink"/> 不为合法的绝对 URI。</exception>
         public YanderePage(string pageLink, string documentText) : this(pageLink, false)
         {
             if (documentText is null)
@@ -105,7 +106,7 @@ namespace YandereSpider
             }
 
             this.documentTextTask = new Task<string>(() => documentText);
-            this.documentTextTask.Start();
+            this.documentTextTask.RunSynchronously();
         }
 
         /// <summary>
@@ -121,36 +122,43 @@ namespace YandereSpider
         /// <param name="getsDocument">指示是否获取页面的 HTML 文本。</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="pageLink"/> 为 <see langword="null"/>。</exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="pageLink"/> 不为合法的绝对 URI。</exception>
         protected YanderePage(string pageLink, bool getsDocument)
         {
             if (pageLink is null)
             {
                 throw new ArgumentNullException(nameof(pageLink));
             }
+            else if (!Uri.TryCreate(pageLink, UriKind.Absolute, out var uri))
+            {
+                throw new ArgumentException(new ArgumentException().Message, nameof(pageLink));
+            }
 
             this.PageLink = pageLink;
+            this.httpClient = new HttpClient();
             this.documentTextTask = getsDocument ?
-                new HttpClient().GetStringAsync(pageLink) : null;
+                this.httpClient.GetStringAsync(pageLink) : null;
         }
+
+        /// <summary>
+        /// 回收 <see cref="YanderePage"/> 类的实例前释放此实例占用的资源。
+        /// </summary>
+        ~YanderePage() => this.Dispose();
 
         /// <summary>
         /// 获取当前页面能够直接导航的页面中指定索引处的页面。
         /// </summary>
-        /// <param name="index">页面的索引，0 代表当前页面；
+        /// <remarks>为提高效率，不执行索引越界检查。</remarks>
+        /// <param name="index">页面的索引。0 代表当前页面，
         /// 除此之外的索引应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
         /// <returns>当前页面能够直接导航的页面中指定索引处的页面，
         /// <paramref name="index"/> 为 0 时则为当前页面。</returns>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="index"/> 超出允许的范围。</exception>
         public YanderePage this[int index]
         {
             get
             {
-                if ((index < 0) || (index > this.Count))
-                {
-                    throw new IndexOutOfRangeException();
-                }
-                else if (index == 0)
+                if (index == 0)
                 {
                     return this;
                 }
@@ -200,17 +208,14 @@ namespace YandereSpider
 
                 try
                 {
-                    this.documentCancellation = new CancellationTokenSource();
-                    this.documentTextTask.Wait(this.documentCancellation.Token);
                     return this.documentTextTask.Result;
                 }
-                catch (OperationCanceledException)
+                catch (Exception e)
+                when (e.InnerException is TaskCanceledException)
                 {
-                    this.documentTextTask = null;
-                    this.documentCancellation = null;
                     return string.Empty;
                 }
-                catch (Exception)
+                catch
                 {
                     this.Refresh();
                     return this.DocumentText;
@@ -392,6 +397,7 @@ namespace YandereSpider
         /// <returns>若 <paramref name="page"/> 为 yande.re 的页面，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
         public static bool IsYanderePage(YanderePage page) =>
+            !(page is null) &&
             page.PageLink.StartsWith(YanderePage.IndexPageLink);
 
         /// <summary>
@@ -401,6 +407,7 @@ namespace YandereSpider
         /// <returns>若 <paramref name="page"/> 为 Posts 页面，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
         public static bool IsPostsPage(YanderePage page) =>
+            !(page is null) &&
             page.PageLink.StartsWith(YanderePage.PostsPageLink) &&
             !page.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
 
@@ -411,6 +418,7 @@ namespace YandereSpider
         /// <returns>若 <paramref name="page"/> 为 Pools 页面，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
         public static bool IsPoolsPage(YanderePage page) =>
+            !(page is null) &&
             page.PageLink.StartsWith(YanderePage.PoolsPageLink) &&
             !page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
@@ -421,6 +429,7 @@ namespace YandereSpider
         /// <returns>若 <paramref name="page"/> 为 Post 页面，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
         public static bool IsPostPage(YanderePage page) =>
+            !(page is null) &&
             page.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
 
         /// <summary>
@@ -430,18 +439,39 @@ namespace YandereSpider
         /// <returns>若 <paramref name="page"/> 为 Pool 页面，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
         public static bool IsPoolPage(YanderePage page) =>
+            !(page is null) &&
             page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
         /// <summary>
         /// 重新获取当前页面的 HTML 文本以刷新内容。
         /// </summary>
-        public virtual void Refresh() =>
-            this.documentTextTask = new HttpClient().GetStringAsync(this.PageLink);
+        public virtual void Refresh()
+        {
+            this.Cancel();
+            this.documentTextTask?.Dispose();
+            this.documentTextTask = this.httpClient?.GetStringAsync(this.PageLink);
+        }
+
+        /// <summary>
+        /// 立刻停止所有 HTTP 传输任务。
+        /// </summary>
+        public virtual void Cancel()
+        {
+            this.httpClient?.CancelPendingRequests();
+            try { this.documentTextTask.Wait(); } catch { }
+        }
 
         /// <summary>
         /// 立刻停止所有 HTTP 传输任务，并释放此实例占用的资源。
         /// </summary>
-        public virtual void Dispose() => this.documentCancellation?.Cancel();
+        public virtual void Dispose()
+        {
+            this.Cancel();
+            this.documentTextTask?.Dispose();
+            this.documentTextTask = null;
+            this.httpClient?.Dispose();
+            this.httpClient = null;
+        }
 
         /// <summary>
         /// 指示当前实例与指定 <see cref="YanderePage"/> 对象是否相等。
@@ -451,8 +481,29 @@ namespace YandereSpider
         /// 若此实例与 <paramref name="other"/> 的 <see cref="YanderePage.PageLink"/> 相等，
         /// 则为 <see langword="true"/>；否则为 <see langword="false"/>。
         /// </returns>
-        public bool Equals(YanderePage other) =>
-            !(other is null) && (this.PageLink == other.PageLink);
+        public bool Equals(YanderePage other)
+        {
+            if (other is null) { return false; }
+
+            var thisUri = new Uri(this.PageLink);
+            var thisScheme = thisUri.GetComponents(UriComponents.Scheme, UriFormat.SafeUnescaped);
+            var thisHost = thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped);
+            var thisPort = thisUri.GetComponents(UriComponents.Port, UriFormat.SafeUnescaped);
+            var thisPath = thisUri.GetComponents(UriComponents.Path, UriFormat.SafeUnescaped);
+            var thisQueries = new SortedSet<string>(
+                thisUri.GetComponents(UriComponents.Query, UriFormat.SafeUnescaped).Split('&'));
+
+            var otherUri = new Uri(other.PageLink);
+            var otherScheme = otherUri.GetComponents(UriComponents.Scheme, UriFormat.SafeUnescaped);
+            var otherHost = otherUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped);
+            var otherPort = otherUri.GetComponents(UriComponents.Port, UriFormat.SafeUnescaped);
+            var otherPath = otherUri.GetComponents(UriComponents.Path, UriFormat.SafeUnescaped);
+            var otherQueries = new SortedSet<string>(
+                otherUri.GetComponents(UriComponents.Query, UriFormat.SafeUnescaped).Split('&'));
+
+            return (thisScheme == otherScheme) && (thisHost == otherHost) &&
+                (thisPort == otherPort) && (thisPath == otherPath) && thisQueries.SetEquals(otherQueries);
+        }
 
         /// <summary>
         /// 指示当前实例与指定对象是否相等。
@@ -469,8 +520,27 @@ namespace YandereSpider
         /// 获取当前页面的哈希代码。
         /// </summary>
         /// <returns>32 位有符号整数的哈希代码。</returns>
-        public override int GetHashCode() =>
-            -76736031 + EqualityComparer<string>.Default.GetHashCode(this.PageLink);
+        public override int GetHashCode()
+        {
+            var thisUri = new Uri(this.PageLink);
+            var thisScheme = thisUri.GetComponents(UriComponents.Scheme, UriFormat.SafeUnescaped);
+            var thisHost = thisUri.GetComponents(UriComponents.Host, UriFormat.SafeUnescaped);
+            var thisPort = thisUri.GetComponents(UriComponents.Port, UriFormat.SafeUnescaped);
+            var thisPath = thisUri.GetComponents(UriComponents.Path, UriFormat.SafeUnescaped);
+            var thisQueries = new SortedSet<string>(
+                thisUri.GetComponents(UriComponents.Query, UriFormat.SafeUnescaped).Split('&'));
+
+            var hashCode = -76736031;
+            hashCode = hashCode * -1521134295 + thisScheme.GetHashCode();
+            hashCode = hashCode * -1521134295 + thisHost.GetHashCode();
+            hashCode = hashCode * -1521134295 + thisPort.GetHashCode();
+            hashCode = hashCode * -1521134295 + thisPath.GetHashCode();
+            foreach (var query in thisQueries)
+            {
+                hashCode = hashCode * -1521134295 + query.GetHashCode();
+            }
+            return hashCode;
+        }
 
         /// <summary>
         /// 返回当前页面的链接。
