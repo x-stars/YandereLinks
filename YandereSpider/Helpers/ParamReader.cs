@@ -37,7 +37,7 @@ namespace XstarS
         /// 初始化命令行参数解析器 <see cref="ParamReader"/> 的新实例。
         /// </summary>
         /// <remarks>
-        /// 输入的参数名称列表用于解析无名参数；若无需解析无名参数，可不写。
+        /// 输入的参数名称列表用于解析无名参数；若无需解析无名参数，可留空。
         /// </remarks>
         /// <param name="arguments">待解析的参数列表。</param>
         /// <param name="ignoreCase">参数名称是否忽略大小写。</param>

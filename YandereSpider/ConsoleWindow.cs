@@ -20,6 +20,10 @@ namespace YandereSpider
         /// </summary>
         private static readonly object SyncRoot = new object();
         /// <summary>
+        /// 指示控制台模式的主要过程是否已经启动。
+        /// </summary>
+        private static bool IsStarted = false;
+        /// <summary>
         /// 当前正在工作的后台线程的数量。
         /// </summary>
         private static int WorkingThreads = -1;
@@ -38,8 +42,8 @@ namespace YandereSpider
         /// <param name="args">程序的启动参数。</param>
         public static void Show(string[] args)
         {
-            ConsoleManager.Show();
-            ConsoleWindow.Run(args);
+            if (!ConsoleManager.HasConsole) { ConsoleManager.Show(); }
+            if (!ConsoleWindow.IsStarted) { ConsoleWindow.Run(args); }
         }
 
         /// <summary>
@@ -47,7 +51,7 @@ namespace YandereSpider
         /// </summary>
         public static void Hide()
         {
-            ConsoleManager.Hide();
+            if (ConsoleManager.HasConsole) { ConsoleManager.Hide(); }
         }
 
         /// <summary>
@@ -56,6 +60,9 @@ namespace YandereSpider
         /// <param name="args">程序的启动参数。</param>
         private static void Run(string[] args)
         {
+            if (ConsoleWindow.IsStarted) { return; }
+            else { ConsoleWindow.IsStarted = true; }
+
             var param = new ParamReader(args, true, new[] { "-e", "-t", "-o" }, new[] { "-h" });
             if (param.GetSwitch("-h"))
             {
