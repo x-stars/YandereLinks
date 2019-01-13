@@ -130,12 +130,12 @@ namespace YandereSpider
         {
             try
             {
-                int? destVersion = SystemComponents.GetInternetExplorerVersion();
-                int? currVersion = SystemComponents.GetWebBrowserVersion();
+                int? destVersion = SystemComponents.InternetExplorer.MajorVersion;
+                int? currVersion = SystemComponents.WebBrowser.MajorVersion;
 
                 if ((currVersion is null) || (currVersion < destVersion))
                 {
-                    SystemComponents.SetWebBrowserVersion((int)destVersion);
+                    SystemComponents.WebBrowser.MajorVersionInCurrentUser = (int)destVersion;
                 }
             }
             catch (Exception ex)

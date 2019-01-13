@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Security;
 
-namespace XstarS
+namespace XstarS.Win32
 {
     /// <summary>
     /// 提供窗口应用程序的控制台窗口管理方法。
@@ -13,17 +13,22 @@ namespace XstarS
     internal static class ConsoleManager
     {
         /// <summary>
+        /// kernel32.dll 的名称。
+        /// </summary>
+        private const string Kernel32DllName = "kernel32.dll";
+
+        /// <summary>
         /// 为当前应用程序分配控制台窗口。
         /// </summary>
         /// <returns>是否成功分配控制台窗口。</returns>
-        [DllImport("kernel32.dll")]
+        [DllImport(ConsoleManager.Kernel32DllName)]
         private static extern bool AllocConsole();
 
         /// <summary>
         /// 释放当前已经分配的控制台窗口。
         /// </summary>
         /// <returns>是否成功释放控制台窗口。</returns>
-        [DllImport("kernel32.dll")]
+        [DllImport(ConsoleManager.Kernel32DllName)]
         private static extern bool FreeConsole();
 
         /// <summary>
@@ -31,7 +36,7 @@ namespace XstarS
         /// </summary>
         /// <returns>当前已分配的控制台窗口的句柄。
         /// 若并未分配控制台窗口，则返回 <see cref="IntPtr.Zero"/>。</returns>
-        [DllImport("kernel32.dll")]
+        [DllImport(ConsoleManager.Kernel32DllName)]
         private static extern IntPtr GetConsoleWindow();
 
         /// <summary>
@@ -87,7 +92,6 @@ namespace XstarS
             var t_Console = typeof(Console);
             var staticNoPublic = BindingFlags.Static | BindingFlags.NonPublic;
 
-            var sf__in = t_Console.GetField("_in", staticNoPublic);
             var sf__out = t_Console.GetField("_out", staticNoPublic);
             var sf__error = t_Console.GetField("_error", staticNoPublic);
             var sm_InitializeStdOutError =

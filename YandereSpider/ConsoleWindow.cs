@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using XstarS;
+using XstarS.Win32;
 
 namespace YandereSpider
 {

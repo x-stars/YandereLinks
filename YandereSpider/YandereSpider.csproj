@@ -62,8 +62,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BindingBase\Bindable.cs" />
-    <Compile Include="BindingBase\BindableObject.cs" />
+    <Compile Include="Binding\Bindable.cs" />
+    <Compile Include="Binding\BindableObject.cs" />
     <Compile Include="ConsoleWindow.cs" />
     <Compile Include="Helpers\ConsoleManager.cs" />
     <Compile Include="Helpers\ControlExtensions.cs" />

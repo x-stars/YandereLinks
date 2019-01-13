@@ -15,8 +15,6 @@
 
 能够提取和遍历 Posts 页面（包括搜索结果）、Pool 页面和 Pools 页面。
 
-第一次启动时会请求修改内置浏览器版本为 Internet Explorer 11，请以管理员身份启动。
-
 内含 `YandereSpider.YanderePage` 类，包含 <https://yande.re/> 页面的常见链接提取功能。
 
 ### 控制台模式
