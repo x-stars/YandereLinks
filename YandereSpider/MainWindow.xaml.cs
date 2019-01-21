@@ -24,8 +24,12 @@ namespace YandereSpider
     /// <summary>
     /// MainWindow.xaml 的交互逻辑。
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
+        /// <summary>
+        /// 指示当前对象是否已经被释放。
+        /// </summary>
+        private volatile bool isDisposed = false;
         /// <summary>
         /// 当前页面的链接。
         /// </summary>
@@ -76,6 +80,11 @@ namespace YandereSpider
         }
 
         /// <summary>
+        /// 回收当前实例前释放此实例占用的资源。
+        /// </summary>
+        ~MainWindow() => this.Dispose(false);
+
+        /// <summary>
         /// 当前页面的链接。绑定到用户控件。
         /// </summary>
         public Bindable<string> BindingPageLink { get; }
@@ -118,6 +127,44 @@ namespace YandereSpider
                 {
                     this.yanderePage = new YanderePage(value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 释放此实例占用的资源。
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// 释放当前实例占用的非托管资源，并根据指示释放托管资源。
+        /// </summary>
+        /// <param name="disposing">指示是否释放托管资源。</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    if (!(this.yanderePage is null))
+                    {
+                        this.yanderePage.Dispose();
+                        this.yanderePage = null;
+                    }
+                    if (!(this.extractLinkWorker is null))
+                    {
+                        this.extractLinkWorker.Dispose();
+                    }
+                    if (!(this.enumeratePageWorker is null))
+                    {
+                        this.enumeratePageWorker.Dispose();
+                    }
+                }
+
+                this.isDisposed = true;
             }
         }
 
@@ -436,5 +483,5 @@ namespace YandereSpider
             this.enumerateButton.Content = e.Result;
             this.extractButton.IsEnabled = true;
         }
-    }
+   }
 }

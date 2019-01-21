@@ -9,41 +9,47 @@ namespace XstarS.Win32
     /// <summary>
     /// 提供窗口应用程序的控制台窗口管理方法。
     /// </summary>
-    [SuppressUnmanagedCodeSecurity]
     internal static class ConsoleManager
     {
         /// <summary>
-        /// kernel32.dll 的名称。
+        /// 提供控制台相关的原生方法。
         /// </summary>
-        private const string Kernel32DllName = "kernel32.dll";
+        [SuppressUnmanagedCodeSecurity]
+        private static class SafeNativeMethods
+        {
+            /// <summary>
+            /// kernel32.dll 的名称。
+            /// </summary>
+            private const string Kernel32DllName = "kernel32.dll";
 
-        /// <summary>
-        /// 为当前应用程序分配控制台窗口。
-        /// </summary>
-        /// <returns>是否成功分配控制台窗口。</returns>
-        [DllImport(ConsoleManager.Kernel32DllName)]
-        private static extern bool AllocConsole();
+            /// <summary>
+            /// 为当前应用程序分配控制台窗口。
+            /// </summary>
+            /// <returns>是否成功分配控制台窗口。</returns>
+            [DllImport(Kernel32DllName)]
+            internal static extern bool AllocConsole();
 
-        /// <summary>
-        /// 释放当前已经分配的控制台窗口。
-        /// </summary>
-        /// <returns>是否成功释放控制台窗口。</returns>
-        [DllImport(ConsoleManager.Kernel32DllName)]
-        private static extern bool FreeConsole();
+            /// <summary>
+            /// 释放当前已经分配的控制台窗口。
+            /// </summary>
+            /// <returns>是否成功释放控制台窗口。</returns>
+            [DllImport(Kernel32DllName)]
+            internal static extern bool FreeConsole();
 
-        /// <summary>
-        /// 获取当前已分配的控制台窗口的句柄。
-        /// </summary>
-        /// <returns>当前已分配的控制台窗口的句柄。
-        /// 若并未分配控制台窗口，则返回 <see cref="IntPtr.Zero"/>。</returns>
-        [DllImport(ConsoleManager.Kernel32DllName)]
-        private static extern IntPtr GetConsoleWindow();
+            /// <summary>
+            /// 获取当前已分配的控制台窗口的句柄。
+            /// </summary>
+            /// <returns>当前已分配的控制台窗口的句柄。
+            /// 若并未分配控制台窗口，则返回 <see cref="IntPtr.Zero"/>。</returns>
+            [DllImport(Kernel32DllName)]
+            internal static extern IntPtr GetConsoleWindow();
+        }
 
         /// <summary>
         /// 指示当前是否已经分配了控制台窗口。
         /// </summary>
         public static bool HasConsole =>
-            ConsoleManager.GetConsoleWindow() != IntPtr.Zero;
+            ConsoleManager.SafeNativeMethods.GetConsoleWindow() != IntPtr.Zero;
 
         /// <summary>  
         /// 为当前应用程序分配控制台窗口。
@@ -52,7 +58,7 @@ namespace XstarS.Win32
         {
             if (!ConsoleManager.HasConsole)
             {
-                ConsoleManager.AllocConsole();
+                ConsoleManager.SafeNativeMethods.AllocConsole();
                 ConsoleManager.InvalidateStdOutError();
             }
         }
@@ -65,7 +71,7 @@ namespace XstarS.Win32
             if (ConsoleManager.HasConsole)
             {
                 ConsoleManager.SetStdOutErrorNull();
-                ConsoleManager.FreeConsole();
+                ConsoleManager.SafeNativeMethods.FreeConsole();
             }
         }
 

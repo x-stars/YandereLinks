@@ -9,7 +9,6 @@ namespace YandereSpider
     /// <summary>
     /// 提供获取 yande.re 页面的内含链接的方法。
     /// </summary>
-    /// <remarks>为设计方便，在初始化之外不抛出任何异常。</remarks>
     public class YanderePage : IDisposable, IReadOnlyList<YanderePage>, IEquatable<YanderePage>
     {
         /// <summary>
@@ -50,13 +49,24 @@ namespace YandereSpider
         protected static readonly string NextPageLinkPrefix;
 
         /// <summary>
-        /// 用于 HTTP 访问的客户端对象。
+        /// 指示当前对象是否已经被释放。
         /// </summary>
-        private HttpClient httpClient;
+        private volatile bool isDisposed = false;
+        /// <summary>
+        /// 页面的链接。
+        /// 使用 <see cref="YanderePage.PageLink"/> 访问以执行对象释放检查。
+        /// </summary>
+        private readonly string pageLink;
         /// <summary>
         /// 获取 HTML 文本的任务。
+        /// 使用 <see cref="YanderePage.DocumentTextTask"/> 访问以执行对象释放检查。
         /// </summary>
         private Task<string> documentTextTask;
+        /// <summary>
+        /// 用于 HTTP 访问的客户端对象。
+        /// 使用 <see cref="YanderePage.HttpClient"/> 访问以执行对象释放检查。
+        /// </summary>
+        private HttpClient httpClient;
 
         /// <summary>
         /// 初始化 <see cref="YanderePage"/> 类的静态成员。
@@ -135,67 +145,64 @@ namespace YandereSpider
                 throw new ArgumentException(new ArgumentException().Message, nameof(pageLink));
             }
 
-            this.PageLink = pageLink;
+            this.pageLink = pageLink;
             this.httpClient = new HttpClient();
             this.documentTextTask = getsDocument ?
                 this.httpClient.GetStringAsync(pageLink) : null;
         }
 
         /// <summary>
-        /// 回收 <see cref="YanderePage"/> 类的实例前释放此实例占用的资源。
-        /// </summary>
-        ~YanderePage() => this.Dispose();
-
-        /// <summary>
         /// 获取当前页面能够直接导航的页面中指定索引处的页面。
         /// </summary>
-        /// <remarks>为提高效率，不执行索引越界检查。</remarks>
         /// <param name="index">页面的索引。0 代表当前页面，
         /// 除此之外的索引应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
         /// <returns>当前页面能够直接导航的页面中指定索引处的页面，
         /// <paramref name="index"/> 为 0 时则为当前页面。</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> 不在 0 到
+        /// <see cref="YanderePage.Count"/> 之间。</exception>
         public YanderePage this[int index]
         {
             get
             {
-                if (index == 0)
+                if ((index < 0) || (index > this.Count))
                 {
-                    return this;
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
 
-                string pageIndexPrefix = "page=";
-                string pageLink = (this.PageLink == YanderePage.IndexPageLink) ?
-                    YanderePage.PostsPageLink : this.PageLink;
-
-                string indexPageLink;
-                if (pageLink.Contains(pageIndexPrefix))
-                {
-                    int pageIndexLength = 0;
-                    int startIndex = pageLink.IndexOf(pageIndexPrefix) + pageIndexPrefix.Length;
-                    for (int i = startIndex; i < pageLink.Length; i++)
-                    {
-                        if (char.IsDigit(pageLink[i]))
-                        {
-                            pageIndexLength++;
-                        }
-                        else { break; }
-                    }
-                    indexPageLink = pageLink.Remove(startIndex, pageIndexLength).
-                        Insert(startIndex, index.ToString());
-                }
-                else
-                {
-                    string paramModifier = pageLink.Contains("?") ? "&" : "?";
-                    indexPageLink = pageLink + paramModifier + pageIndexPrefix + index.ToString();
-                }
-                return new YanderePage(indexPageLink);
+                return this.PageAt(index);
             }
         }
 
         /// <summary>
+        /// 获取当前对象，并检查当前对象是否已经被释放。
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">当前对象已经被释放。</exception>
+        private YanderePage Disposable =>
+            this.isDisposed ? throw new ObjectDisposedException(null) : this;
+
+        /// <summary>
         /// 页面的链接。
         /// </summary>
-        public string PageLink { get; }
+        public string PageLink => this.Disposable.pageLink;
+
+        /// <summary>
+        /// 获取 HTML 文本的任务。
+        /// </summary>
+        private Task<string> DocumentTextTask
+        {
+            get => this.Disposable.documentTextTask;
+            set => this.Disposable.documentTextTask = value;
+        }
+
+        /// <summary>
+        /// 用于 HTTP 访问的客户端对象。
+        /// </summary>
+        private HttpClient HttpClient
+        {
+            get => this.Disposable.httpClient;
+            set => this.Disposable.httpClient = value;
+        }
 
         /// <summary>
         /// 页面的 HTML 文本。
@@ -204,11 +211,11 @@ namespace YandereSpider
         {
             get
             {
-                if (this.documentTextTask is null) { return string.Empty; }
+                if (this.DocumentTextTask is null) { return string.Empty; }
 
                 try
                 {
-                    return this.documentTextTask.Result;
+                    return this.DocumentTextTask.Result;
                 }
                 catch (Exception e)
                 when (e.InnerException is TaskCanceledException)
@@ -327,18 +334,8 @@ namespace YandereSpider
         /// <summary>
         /// Pools 页面的所有 Pool 页面的 <see cref="YanderePage"/> 对象。
         /// </summary>
-        public YanderePage[] PoolPages
-        {
-            get
-            {
-                var poolPages = new YanderePage[this.PoolPageLinks.Length];
-                for (int i = 0; i < this.PoolPageLinks.Length; i++)
-                {
-                    poolPages[i] = new YanderePage(this.PoolPageLinks[i]);
-                }
-                return poolPages;
-            }
-        }
+        public YanderePage[] PoolPages =>
+            Array.ConvertAll(this.PoolPageLinks, pageLink => new YanderePage(pageLink));
 
         /// <summary>
         /// 上一页面的链接。
@@ -448,8 +445,8 @@ namespace YandereSpider
         public virtual void Refresh()
         {
             this.Cancel();
-            this.documentTextTask?.Dispose();
-            this.documentTextTask = this.httpClient?.GetStringAsync(this.PageLink);
+            this.DocumentTextTask?.Dispose();
+            this.DocumentTextTask = this.HttpClient?.GetStringAsync(this.PageLink);
         }
 
         /// <summary>
@@ -457,20 +454,60 @@ namespace YandereSpider
         /// </summary>
         public virtual void Cancel()
         {
-            this.httpClient?.CancelPendingRequests();
-            try { this.documentTextTask.Wait(); } catch { }
+            this.HttpClient?.CancelPendingRequests();
+            try { this.DocumentTextTask.Wait(); } catch { }
         }
 
         /// <summary>
-        /// 立刻停止所有 HTTP 传输任务，并释放此实例占用的资源。
+        /// 获取当前页面能够直接导航的页面中指定索引处的页面。不执行索引越界检查。
         /// </summary>
-        public virtual void Dispose()
+        /// <param name="index">页面的索引。0 代表当前页面，
+        /// 除此之外的索引应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
+        /// <returns>当前页面能够直接导航的页面中指定索引处的页面，
+        /// <paramref name="index"/> 为 0 时则为当前页面。</returns>
+        /// <returns>当前页面能够直接导航的页面中索引值为 <paramref name="index"/> 的页面。</returns>
+        public YanderePage PageAt(int index)
         {
-            this.Cancel();
-            this.documentTextTask?.Dispose();
-            this.documentTextTask = null;
-            this.httpClient?.Dispose();
-            this.httpClient = null;
+            if (index == 0)
+            {
+                return this;
+            }
+
+            string pageIndexPrefix = "page=";
+            string pageLink = (this.PageLink == YanderePage.IndexPageLink) ?
+                YanderePage.PostsPageLink : this.PageLink;
+
+            string indexPageLink;
+            if (pageLink.Contains(pageIndexPrefix))
+            {
+                int pageIndexLength = 0;
+                int startIndex = pageLink.IndexOf(pageIndexPrefix) + pageIndexPrefix.Length;
+                for (int i = startIndex; i < pageLink.Length; i++)
+                {
+                    if (char.IsDigit(pageLink[i]))
+                    {
+                        pageIndexLength++;
+                    }
+                    else { break; }
+                }
+                indexPageLink = pageLink.Remove(startIndex, pageIndexLength).
+                    Insert(startIndex, index.ToString());
+            }
+            else
+            {
+                string paramModifier = pageLink.Contains("?") ? "&" : "?";
+                indexPageLink = pageLink + paramModifier + pageIndexPrefix + index.ToString();
+            }
+            return new YanderePage(indexPageLink);
+        }
+
+        /// <summary>
+        /// 释放此实例占用的资源。
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -547,6 +584,33 @@ namespace YandereSpider
         /// </summary>
         /// <returns>当前页面的链接。</returns>
         public override string ToString() => this.PageLink.ToString();
+
+        /// <summary>
+        /// 释放当前实例占用的非托管资源，并根据指示释放托管资源。
+        /// </summary>
+        /// <param name="disposing">指示是否释放托管资源。</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    this.Cancel();
+                    if (!(this.documentTextTask is null))
+                    {
+                        this.documentTextTask.Dispose();
+                        this.documentTextTask = null;
+                    }
+                    if (!(this.httpClient is null))
+                    {
+                        this.httpClient.Dispose();
+                        this.httpClient = null;
+                    }
+                }
+
+                this.isDisposed = true;
+            }
+        }
 
         /// <summary>
         /// 返回一个从当前页面直到最后一页的枚举器。
