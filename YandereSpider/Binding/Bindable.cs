@@ -15,6 +15,7 @@ namespace XstarS.ComponentModel
     /// 并会替换 <see cref="INotifyPropertyChanged.PropertyChanged"/> 事件委托，破坏绑定关系。
     /// </para></remarks>
     /// <typeparam name="T"><see cref="Bindable{T}"/> 中用于数据绑定的值的类型。</typeparam>
+    [Serializable]
     public class Bindable<T> : BindableObject
     {
         /// <summary>

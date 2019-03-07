@@ -8,6 +8,7 @@ namespace XstarS.ComponentModel
     /// <summary>
     /// <see cref="INotifyPropertyChanged"/> 接口的实现，用于实现数据绑定到用户控件的抽象类。
     /// </summary>
+    [Serializable]
     public abstract class BindableObject : INotifyPropertyChanged
     {
         /// <summary>

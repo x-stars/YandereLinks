@@ -14,25 +14,9 @@ namespace XstarS
     /// 不支持一个参数名称后跟多个参数值的有名参数的解析。
     /// 不支持多个同名的有名参数的解析。
     /// </remarks>
+    [Serializable]
     internal class ParamReader
     {
-        /// <summary>
-        /// 待解析的参数列表。
-        /// </summary>
-        private readonly string[] arguments;
-        /// <summary>
-        /// 有名参数名称列表。
-        /// </summary>
-        private readonly string[] paramNames;
-        /// <summary>
-        /// 开关参数名称列表。
-        /// </summary>
-        private readonly string[] switchNames;
-        /// <summary>
-        /// 比较参数名称时采用的字符串比较器。
-        /// </summary>
-        private readonly IEqualityComparer<string> stringComparer;
-
         /// <summary>
         /// 初始化命令行参数解析器 <see cref="ParamReader"/> 的新实例。
         /// </summary>
@@ -43,16 +27,36 @@ namespace XstarS
         /// <param name="ignoreCase">参数名称是否忽略大小写。</param>
         /// <param name="paramNames">所有有名参数名称列表。</param>
         /// <param name="switchNames">所有开关参数名称列表。</param>
-        public ParamReader(string[] arguments,
-            bool ignoreCase = true, string[] paramNames = null, string[] switchNames = null)
+        public ParamReader(string[] arguments, bool ignoreCase,
+            string[] paramNames = null, string[] switchNames = null)
         {
-            this.arguments = arguments ?? new string[0];
-            this.switchNames = switchNames ?? new string[0];
-            this.paramNames = paramNames ?? new string[0];
-            this.stringComparer = ignoreCase ?
+            this.Arguments = Array.AsReadOnly(arguments ?? Array.Empty<string>());
+            this.SwitchNames = Array.AsReadOnly(switchNames ?? Array.Empty<string>());
+            this.ParamNames = Array.AsReadOnly(paramNames ?? Array.Empty<string>());
+            this.NameComparer = ignoreCase ?
                 StringComparer.InvariantCultureIgnoreCase :
                 StringComparer.InvariantCulture;
         }
+
+        /// <summary>
+        /// 待解析的参数列表。
+        /// </summary>
+        public IReadOnlyList<string> Arguments { get; }
+
+        /// <summary>
+        /// 有名参数名称列表。
+        /// </summary>
+        public IReadOnlyList<string> ParamNames { get; }
+
+        /// <summary>
+        /// 开关参数名称列表。
+        /// </summary>
+        public IReadOnlyList<string> SwitchNames { get; }
+
+        /// <summary>
+        /// 比较参数名称时采用的字符串比较器。
+        /// </summary>
+        protected IEqualityComparer<string> NameComparer { get; }
 
         /// <summary>
         /// 解析指定名称的有名参数。
@@ -73,12 +77,12 @@ namespace XstarS
                 throw new ArgumentNullException(nameof(paramName));
             }
 
-            for (int i = 0; i < this.arguments.Length - 1; i++)
+            for (int i = 0; i < this.Arguments.Count - 1; i++)
             {
                 // 当前为指定有名参数的名称。
-                if (this.stringComparer.Equals(this.arguments[i], paramName))
+                if (this.NameComparer.Equals(this.Arguments[i], paramName))
                 {
-                    return this.arguments[i + 1];
+                    return this.Arguments[i + 1];
                 }
             }
 
@@ -104,22 +108,22 @@ namespace XstarS
                 throw new ArgumentOutOfRangeException(nameof(paramIndex));
             }
 
-            for (int i = 0, currParamIndex = 0; i < this.arguments.Length; i++)
+            for (int i = 0, currParamIndex = 0; i < this.Arguments.Count; i++)
             {
                 // 当前为开关参数名称。
-                if (this.switchNames.Contains(this.arguments[i], this.stringComparer))
+                if (this.SwitchNames.Contains(this.Arguments[i], this.NameComparer))
                 {
                     ;
                 }
                 // 当前为有名参数名称。
-                else if (this.paramNames.Contains(this.arguments[i], this.stringComparer))
+                else if (this.ParamNames.Contains(this.Arguments[i], this.NameComparer))
                 {
                     i++;
                 }
                 // 当前为对应位置的无名参数。
                 else if (currParamIndex == paramIndex)
                 {
-                    return this.arguments[i];
+                    return this.Arguments[i];
                 }
                 // 当前为其他位置的无名参数。
                 else
@@ -151,7 +155,7 @@ namespace XstarS
             }
 
             // 直接检查参数列表中是否包含指定开关参数。
-            return this.arguments.Contains(switchName, this.stringComparer);
+            return this.Arguments.Contains(switchName, this.NameComparer);
         }
     }
 }

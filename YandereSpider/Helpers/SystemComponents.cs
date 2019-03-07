@@ -7,6 +7,8 @@ namespace XstarS.Win32
     /// <summary>
     /// 表示 Win32 系统组件。
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
     internal static class SystemComponents
     {
         /// <summary>
