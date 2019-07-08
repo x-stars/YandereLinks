@@ -55,22 +55,22 @@ namespace YandereSpider
         /// <summary>
         /// 指示当前对象是否已经被释放。
         /// </summary>
-        private volatile bool isDisposed = false;
+        private volatile bool IsDisposed = false;
         /// <summary>
         /// 页面的链接。
         /// 使用 <see cref="YanderePage.PageLink"/> 访问以执行对象释放检查。
         /// </summary>
-        private readonly string pageLink;
+        private readonly string InternalPageLink;
         /// <summary>
         /// 用于 HTTP 访问的客户端对象。
         /// 使用 <see cref="YanderePage.HttpClient"/> 访问以执行对象释放检查。
         /// </summary>
-        private HttpClient httpClient;
+        private HttpClient InternalHttpClient;
         /// <summary>
         /// 获取 HTML 文本的任务。
         /// 使用 <see cref="YanderePage.DocumentTextTask"/> 访问以执行对象释放检查。
         /// </summary>
-        private Task<string> documentTextTask;
+        private Task<string> InternalDocumentTextTask;
 
         /// <summary>
         /// 初始化 <see cref="YanderePage"/> 类的静态成员。
@@ -119,8 +119,8 @@ namespace YandereSpider
                 throw new ArgumentNullException(nameof(documentText));
             }
 
-            this.documentTextTask = new Task<string>(() => documentText);
-            this.documentTextTask.RunSynchronously();
+            this.InternalDocumentTextTask = new Task<string>(() => documentText);
+            this.InternalDocumentTextTask.RunSynchronously();
         }
 
         /// <summary>
@@ -149,10 +149,10 @@ namespace YandereSpider
                 throw new ArgumentException(new ArgumentException().Message, nameof(pageLink));
             }
 
-            this.pageLink = pageLink;
-            this.httpClient = new HttpClient();
-            this.documentTextTask = getsDocument ?
-                this.httpClient.GetStringAsync(pageLink) : null;
+            this.InternalPageLink = pageLink;
+            this.InternalHttpClient = new HttpClient();
+            this.InternalDocumentTextTask = getsDocument ?
+                this.InternalHttpClient.GetStringAsync(pageLink) : null;
         }
 
         /// <summary>
@@ -183,20 +183,20 @@ namespace YandereSpider
         /// </summary>
         /// <exception cref="ObjectDisposedException">当前对象已经被释放。</exception>
         private YanderePage Disposable =>
-            this.isDisposed ? throw new ObjectDisposedException(null) : this;
+            this.IsDisposed ? throw new ObjectDisposedException(null) : this;
 
         /// <summary>
         /// 页面的链接。
         /// </summary>
-        public string PageLink => this.Disposable.pageLink;
+        public string PageLink => this.Disposable.InternalPageLink;
 
         /// <summary>
         /// 用于 HTTP 访问的客户端对象。
         /// </summary>
         private HttpClient HttpClient
         {
-            get => this.Disposable.httpClient;
-            set => this.Disposable.httpClient = value;
+            get => this.Disposable.InternalHttpClient;
+            set => this.Disposable.InternalHttpClient = value;
         }
 
         /// <summary>
@@ -204,8 +204,8 @@ namespace YandereSpider
         /// </summary>
         private Task<string> DocumentTextTask
         {
-            get => this.Disposable.documentTextTask;
-            set => this.Disposable.documentTextTask = value;
+            get => this.Disposable.InternalDocumentTextTask;
+            set => this.Disposable.InternalDocumentTextTask = value;
         }
 
         /// <summary>
@@ -548,18 +548,18 @@ namespace YandereSpider
         /// <param name="disposing">指示是否释放托管资源。</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.isDisposed)
+            if (!this.IsDisposed)
             {
                 if (disposing)
                 {
                     this.Cancel();
-                    this.documentTextTask?.Dispose();
-                    this.documentTextTask = null;
-                    this.httpClient?.Dispose();
-                    this.httpClient = null;
+                    this.InternalDocumentTextTask?.Dispose();
+                    this.InternalDocumentTextTask = null;
+                    this.InternalHttpClient?.Dispose();
+                    this.InternalHttpClient = null;
                 }
 
-                this.isDisposed = true;
+                this.IsDisposed = true;
             }
         }
 

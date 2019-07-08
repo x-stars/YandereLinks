@@ -29,60 +29,55 @@ namespace YandereSpider
         /// <summary>
         /// 指示当前对象是否已经被释放。
         /// </summary>
-        private volatile bool isDisposed = false;
+        private volatile bool IsDisposed = false;
         /// <summary>
         /// 当前页面的链接。
         /// </summary>
-        private string pageLink;
+        private string PageLink;
         /// <summary>
         /// yande.re 页面链接提取对象。
         /// </summary>
-        private YanderePage yanderePage;
+        private YanderePage PageObject;
         /// <summary>
         /// 提取链接的后台线程。
         /// </summary>
-        private readonly BackgroundWorker extractLinkWorker;
+        private readonly BackgroundWorker ExtractLinkWorker;
         /// <summary>
         /// 遍历页面的后台线程。
         /// </summary>
-        private readonly BackgroundWorker enumeratePageWorker;
+        private readonly BackgroundWorker EnumeratePageWorker;
 
         /// <summary>
         /// 初始化 <see cref="MainWindow"/> 的新实例。
         /// </summary>
         public MainWindow()
         {
-            this.pageLink = string.Empty;
+            this.PageLink = string.Empty;
             this.BindingPageLink = string.Empty;
             this.WebBrowserCanGoBack = false;
             this.WebBrowserCanGoForward = false;
             this.ImageLinks = string.Empty;
 
-            this.extractLinkWorker = new BackgroundWorker()
+            this.ExtractLinkWorker = new BackgroundWorker()
             {
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true
             };
-            this.extractLinkWorker.DoWork += this.ExtractLinkWorker_DoWork;
-            this.extractLinkWorker.ProgressChanged += this.ExtractLinkWorker_ProgressChanged;
-            this.extractLinkWorker.RunWorkerCompleted += this.ExtractLinkWorker_RunWorkerCompleted;
+            this.ExtractLinkWorker.DoWork += this.ExtractLinkWorker_DoWork;
+            this.ExtractLinkWorker.ProgressChanged += this.ExtractLinkWorker_ProgressChanged;
+            this.ExtractLinkWorker.RunWorkerCompleted += this.ExtractLinkWorker_RunWorkerCompleted;
 
-            this.enumeratePageWorker = new BackgroundWorker()
+            this.EnumeratePageWorker = new BackgroundWorker()
             {
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true
             };
-            this.enumeratePageWorker.DoWork += this.EnumeratePageWorker_DoWork;
-            this.enumeratePageWorker.ProgressChanged += this.EnumeratePageWorker_ProgressChanged;
-            this.enumeratePageWorker.RunWorkerCompleted += this.EnumeratePageWorker_RunWorkerCompleted;
+            this.EnumeratePageWorker.DoWork += this.EnumeratePageWorker_DoWork;
+            this.EnumeratePageWorker.ProgressChanged += this.EnumeratePageWorker_ProgressChanged;
+            this.EnumeratePageWorker.RunWorkerCompleted += this.EnumeratePageWorker_RunWorkerCompleted;
 
             this.InitializeComponent();
         }
-
-        /// <summary>
-        /// 回收当前实例前释放此实例占用的资源。
-        /// </summary>
-        ~MainWindow() => this.Dispose(false);
 
         /// <summary>
         /// 当前页面的链接。绑定到用户控件。
@@ -108,24 +103,24 @@ namespace YandereSpider
         /// 当前页面的链接。
         /// 更改此值会同步更改各个页面链接相关对象。
         /// </summary>
-        public string PageLink
+        public string UniversalPageLink
         {
-            get => this.pageLink;
+            get => this.PageLink;
             set
             {
-                this.pageLink = value;
+                this.PageLink = value;
 
                 if (this.BindingPageLink != value)
                 {
                     this.BindingPageLink.Value = value;
                 }
-                if (this.webBrowser?.Source?.ToString() != value)
+                if (this.WebBrowser?.Source?.ToString() != value)
                 {
-                    this.webBrowser?.Navigate(value);
+                    this.WebBrowser?.Navigate(value);
                 }
-                if (this.yanderePage?.PageLink != value)
+                if (this.PageObject?.PageLink != value)
                 {
-                    this.yanderePage = new YanderePage(value);
+                    this.PageObject = new YanderePage(value);
                 }
             }
         }
@@ -145,26 +140,17 @@ namespace YandereSpider
         /// <param name="disposing">指示是否释放托管资源。</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.isDisposed)
+            if (!this.IsDisposed)
             {
                 if (disposing)
                 {
-                    if (!(this.yanderePage is null))
-                    {
-                        this.yanderePage.Dispose();
-                        this.yanderePage = null;
-                    }
-                    if (!(this.extractLinkWorker is null))
-                    {
-                        this.extractLinkWorker.Dispose();
-                    }
-                    if (!(this.enumeratePageWorker is null))
-                    {
-                        this.enumeratePageWorker.Dispose();
-                    }
+                    this.PageObject?.Dispose();
+                    this.PageObject = null;
+                    this.ExtractLinkWorker?.Dispose();
+                    this.EnumeratePageWorker?.Dispose();
                 }
 
-                this.isDisposed = true;
+                this.IsDisposed = true;
             }
         }
 
@@ -198,8 +184,8 @@ namespace YandereSpider
                 MessageBox.Show(ex.GetType().ToString() + Environment.NewLine + ex.Message);
             }
 
-            this.webBrowser.SuppressScriptErrors();
-            this.PageLink = YanderePage.IndexPageLink;
+            this.WebBrowser.SuppressScriptErrors();
+            this.UniversalPageLink = YanderePage.IndexPageLink;
         }
 
         /// <summary>
@@ -230,9 +216,9 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void WebBrowser_Navigated(object sender, NavigationEventArgs e)
         {
-            this.PageLink = this.webBrowser.Source.ToString();
-            this.WebBrowserCanGoBack.Value = this.webBrowser?.CanGoBack ?? false;
-            this.WebBrowserCanGoForward.Value = this.webBrowser?.CanGoForward ?? false;
+            this.UniversalPageLink = this.WebBrowser.Source.ToString();
+            this.WebBrowserCanGoBack.Value = this.WebBrowser?.CanGoBack ?? false;
+            this.WebBrowserCanGoForward.Value = this.WebBrowser?.CanGoForward ?? false;
         }
 
         /// <summary>
@@ -242,7 +228,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void GoBackButton_Click(object sender, RoutedEventArgs e)
         {
-            this.webBrowser.GoBack();
+            this.WebBrowser.GoBack();
         }
 
         /// <summary>
@@ -252,7 +238,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void GoForwardButton_Click(object sender, RoutedEventArgs e)
         {
-            this.webBrowser.GoForward();
+            this.WebBrowser.GoForward();
         }
 
         /// <summary>
@@ -262,7 +248,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void HomePageButton_Click(object sender, RoutedEventArgs e)
         {
-            this.webBrowser.Navigate(YanderePage.IndexPageLink);
+            this.WebBrowser.Navigate(YanderePage.IndexPageLink);
         }
 
         /// <summary>
@@ -272,7 +258,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void GoToButton_Click(object sender, RoutedEventArgs e)
         {
-            this.webBrowser.Navigate(this.addressTextBox.Text);
+            this.WebBrowser.Navigate(this.AddressTextBox.Text);
         }
 
         /// <summary>
@@ -282,7 +268,7 @@ namespace YandereSpider
         /// <param name="e">提供事件参数的对象。</param>
         private void AddressTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) { this.webBrowser.Navigate(this.addressTextBox.Text); }
+            if (e.Key == Key.Enter) { this.WebBrowser.Navigate(this.AddressTextBox.Text); }
         }
 
         /// <summary>
@@ -293,18 +279,18 @@ namespace YandereSpider
         private void ExtractButton_Click(object sender, RoutedEventArgs e)
         {
             string cancelButtonContent = Properties.LocalizedResources.MainWindow_CancelButton;
-            if ((this.extractButton.Content as string) != cancelButtonContent)
+            if ((this.ExtractButton.Content as string) != cancelButtonContent)
             {
-                this.enumerateButton.IsEnabled = false;
-                string extractButtonContent = this.extractButton.Content as string;
-                this.extractButton.Content = cancelButtonContent;
-                this.extractLinkWorker.RunWorkerAsync(extractButtonContent);
+                this.EnumerateButton.IsEnabled = false;
+                string extractButtonContent = this.ExtractButton.Content as string;
+                this.ExtractButton.Content = cancelButtonContent;
+                this.ExtractLinkWorker.RunWorkerAsync(extractButtonContent);
             }
             else
             {
-                this.extractLinkWorker.CancelAsync();
-                this.yanderePage.Dispose();
-                this.yanderePage = new YanderePage(this.PageLink);
+                this.ExtractLinkWorker.CancelAsync();
+                this.PageObject.Dispose();
+                this.PageObject = new YanderePage(this.UniversalPageLink);
             }
         }
 
@@ -316,18 +302,18 @@ namespace YandereSpider
         private void EnumerateButton_Click(object sender, RoutedEventArgs e)
         {
             string cancelButtonContent = Properties.LocalizedResources.MainWindow_CancelButton;
-            if (this.enumerateButton.Content as string != cancelButtonContent)
+            if (this.EnumerateButton.Content as string != cancelButtonContent)
             {
-                this.extractButton.IsEnabled = false;
-                string enumerateButtonContent = this.enumerateButton.Content as string;
-                this.enumerateButton.Content = cancelButtonContent;
-                this.enumeratePageWorker.RunWorkerAsync(enumerateButtonContent);
+                this.ExtractButton.IsEnabled = false;
+                string enumerateButtonContent = this.EnumerateButton.Content as string;
+                this.EnumerateButton.Content = cancelButtonContent;
+                this.EnumeratePageWorker.RunWorkerAsync(enumerateButtonContent);
             }
             else
             {
-                this.enumeratePageWorker.CancelAsync();
-                this.yanderePage.Dispose();
-                this.yanderePage = new YanderePage(this.PageLink);
+                this.EnumeratePageWorker.CancelAsync();
+                this.PageObject.Dispose();
+                this.PageObject = new YanderePage(this.UniversalPageLink);
             }
         }
 
@@ -360,16 +346,16 @@ namespace YandereSpider
         {
             e.Result = e.Argument;
 
-            var page = this.yanderePage;
+            var page = this.PageObject;
             if (!YanderePage.IsYanderePage(page)) { return; }
 
             if (YanderePage.IsPoolsPage(page))
             {
                 foreach (var poolPage in page.PoolPages)
                 {
-                    if (this.extractLinkWorker.CancellationPending) { return; }
+                    if (this.ExtractLinkWorker.CancellationPending) { return; }
 
-                    this.yanderePage = poolPage;
+                    this.PageObject = poolPage;
 
                     foreach (var imageLink in poolPage.ImageLinks)
                     {
@@ -409,8 +395,8 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void ExtractLinkWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.extractButton.Content = e.Result;
-            this.enumerateButton.IsEnabled = true;
+            this.ExtractButton.Content = e.Result;
+            this.EnumerateButton.IsEnabled = true;
         }
 
         /// <summary>
@@ -422,24 +408,24 @@ namespace YandereSpider
         {
             e.Result = e.Argument;
 
-            var firstPage = this.yanderePage;
+            var firstPage = this.PageObject;
             if (!YanderePage.IsYanderePage(firstPage)) { return; }
 
             foreach (var page in firstPage)
             {
-                if (this.enumeratePageWorker.CancellationPending) { return; }
+                if (this.EnumeratePageWorker.CancellationPending) { return; }
 
                 this.BindingPageLink.Value = page.PageLink;
-                this.enumeratePageWorker.ReportProgress(0);
-                this.yanderePage = page;
+                this.EnumeratePageWorker.ReportProgress(0);
+                this.PageObject = page;
 
                 if (YanderePage.IsPoolsPage(page))
                 {
                     foreach (var poolPage in page.PoolPages)
                     {
-                        if (this.enumeratePageWorker.CancellationPending) { return; }
+                        if (this.EnumeratePageWorker.CancellationPending) { return; }
 
-                        this.yanderePage = poolPage;
+                        this.PageObject = poolPage;
 
                         foreach (var imageLink in poolPage.ImageLinks)
                         {
@@ -470,7 +456,7 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void EnumeratePageWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.PageLink = this.BindingPageLink;
+            this.UniversalPageLink = this.BindingPageLink;
         }
 
         /// <summary>
@@ -480,8 +466,8 @@ namespace YandereSpider
         /// <param name="e">提供事件数据的对象。</param>
         private void EnumeratePageWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.enumerateButton.Content = e.Result;
-            this.extractButton.IsEnabled = true;
+            this.EnumerateButton.Content = e.Result;
+            this.ExtractButton.IsEnabled = true;
         }
    }
 }
