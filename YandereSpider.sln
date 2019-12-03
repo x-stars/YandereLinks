@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2042
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YandereSpider", "YandereSpider\YandereSpider.csproj", "{078D7136-874B-4FCC-9E8C-38CB5F6716A8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YandereSpider.WinForm", "YandereSpider.WinForm\YandereSpider.WinForm.csproj", "{C3619CE2-2F71-47C6-8DBC-B6A89C428656}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +15,6 @@ Global
 		{078D7136-874B-4FCC-9E8C-38CB5F6716A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{078D7136-874B-4FCC-9E8C-38CB5F6716A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{078D7136-874B-4FCC-9E8C-38CB5F6716A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3619CE2-2F71-47C6-8DBC-B6A89C428656}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3619CE2-2F71-47C6-8DBC-B6A89C428656}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3619CE2-2F71-47C6-8DBC-B6A89C428656}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3619CE2-2F71-47C6-8DBC-B6A89C428656}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
