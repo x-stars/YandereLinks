@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace YandereSpider
+namespace YandereSpider.Models
 {
     /// <summary>
     /// 提供获取 yande.re 页面的内含链接的方法。
@@ -19,58 +19,64 @@ namespace YandereSpider
         /// yande.re 首页链接，默认跳转到 Posts 页面。
         /// </summary>
         public static readonly string IndexPageLink;
+
         /// <summary>
         /// Posts 页面链接。
         /// </summary>
         public static readonly string PostsPageLink;
+
         /// <summary>
         /// Pools 页面链接。
         /// </summary>
         public static readonly string PoolsPageLink;
+
         /// <summary>
         /// Post 页面链接的静态部分。
         /// </summary>
         protected static readonly string PostPageLinkStatic;
+
         /// <summary>
         /// Pool 页面链接的静态部分。
         /// </summary>
         protected static readonly string PoolPageLinkStatic;
+
         /// <summary>
         /// 图片链接前缀。
         /// </summary>
         protected static readonly string ImageLinkPrefix;
+
         /// <summary>
         /// Pool 页面链接前缀。
         /// </summary>
         protected static readonly string PoolPageLinkPrefix;
+
         /// <summary>
         /// 上一页链接前缀。
         /// </summary>
         protected static readonly string PrevPageLinkPrefix;
+
         /// <summary>
         /// 下一页链接前缀。
         /// </summary>
         protected static readonly string NextPageLinkPrefix;
 
         /// <summary>
-        /// 指示当前对象是否已经被释放。
-        /// </summary>
-        private volatile bool IsDisposed = false;
-        /// <summary>
         /// 页面的链接。
         /// 使用 <see cref="YanderePage.PageLink"/> 访问以执行对象释放检查。
         /// </summary>
-        private readonly string InternalPageLink;
+        private readonly string _PageLink;
+
         /// <summary>
         /// 用于 HTTP 访问的客户端对象。
         /// 使用 <see cref="YanderePage.HttpClient"/> 访问以执行对象释放检查。
         /// </summary>
-        private HttpClient InternalHttpClient;
+        private HttpClient _HttpClient;
+
         /// <summary>
         /// 获取 HTML 文本的任务。
         /// 使用 <see cref="YanderePage.DocumentTextTask"/> 访问以执行对象释放检查。
         /// </summary>
-        private Task<string> InternalDocumentTextTask;
+        private Task<string> _DocumentTextTask;
 
         /// <summary>
         /// 初始化 <see cref="YanderePage"/> 类的静态成员。
@@ -119,8 +125,8 @@ namespace YandereSpider
                 throw new ArgumentNullException(nameof(documentText));
             }
 
-            this.InternalDocumentTextTask = new Task<string>(() => documentText);
-            this.InternalDocumentTextTask.RunSynchronously();
+            this._DocumentTextTask = new Task<string>(() => documentText);
+            this._DocumentTextTask.RunSynchronously();
         }
 
         /// <summary>
@@ -149,10 +155,10 @@ namespace YandereSpider
                 throw new ArgumentException(new ArgumentException().Message, nameof(pageLink));
             }
 
-            this.InternalPageLink = pageLink;
-            this.InternalHttpClient = new HttpClient();
-            this.InternalDocumentTextTask = getsDocument ?
-                this.InternalHttpClient.GetStringAsync(pageLink) : null;
+            this._PageLink = pageLink;
+            this._HttpClient = new HttpClient();
+            this._DocumentTextTask = getsDocument ?
+                this._HttpClient.GetStringAsync(pageLink) : null;
         }
 
         /// <summary>
@@ -179,24 +185,29 @@ namespace YandereSpider
         }
 
         /// <summary>
+        /// 指示当前对象是否已经被释放。
+        /// </summary>
+        protected bool IsDisposed { get; private set; } = false;
+
+        /// <summary>
         /// 获取当前对象，并检查当前对象是否已经被释放。
         /// </summary>
         /// <exception cref="ObjectDisposedException">当前对象已经被释放。</exception>
-        private YanderePage Disposable =>
+        protected YanderePage Disposable =>
             this.IsDisposed ? throw new ObjectDisposedException(null) : this;
 
         /// <summary>
         /// 页面的链接。
         /// </summary>
-        public string PageLink => this.Disposable.InternalPageLink;
+        public string PageLink => this.Disposable._PageLink;
 
         /// <summary>
         /// 用于 HTTP 访问的客户端对象。
         /// </summary>
         private HttpClient HttpClient
         {
-            get => this.Disposable.InternalHttpClient;
-            set => this.Disposable.InternalHttpClient = value;
+            get => this.Disposable._HttpClient;
+            set => this.Disposable._HttpClient = value;
         }
 
         /// <summary>
@@ -204,8 +215,8 @@ namespace YandereSpider
         /// </summary>
         private Task<string> DocumentTextTask
         {
-            get => this.Disposable.InternalDocumentTextTask;
-            set => this.Disposable.InternalDocumentTextTask = value;
+            get => this.Disposable._DocumentTextTask;
+            set => this.Disposable._DocumentTextTask = value;
         }
 
         /// <summary>
@@ -553,10 +564,10 @@ namespace YandereSpider
                 if (disposing)
                 {
                     this.Cancel();
-                    this.InternalDocumentTextTask?.Dispose();
-                    this.InternalDocumentTextTask = null;
-                    this.InternalHttpClient?.Dispose();
-                    this.InternalHttpClient = null;
+                    this._DocumentTextTask?.Dispose();
+                    this._DocumentTextTask = null;
+                    this._HttpClient?.Dispose();
+                    this._HttpClient = null;
                 }
 
                 this.IsDisposed = true;

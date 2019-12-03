@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using XstarS;
 using XstarS.Win32;
+using YandereSpider.Models;
 
-namespace YandereSpider
+namespace YandereSpider.Views
 {
     /// <summary>
     /// 控制台模式的运行逻辑。
@@ -20,18 +18,22 @@ namespace YandereSpider
         /// 全局线程同步锁。
         /// </summary>
         private static readonly object SyncRoot = new object();
+
         /// <summary>
         /// 指示控制台模式的主要过程是否已经启动。
         /// </summary>
         private static bool IsStarted = false;
+
         /// <summary>
         /// 当前正在工作的后台线程的数量。
         /// </summary>
         private static int WorkingThreads = -1;
+
         /// <summary>
         /// 图片链接输出文件的路径。
         /// </summary>
         private static string OutFile = null;
+
         /// <summary>
         /// 所有图片的链接。
         /// </summary>
@@ -209,19 +211,8 @@ namespace YandereSpider
         /// <param name="page">页面链接提取对象。</param>
         private static void ExtractPage(YanderePage page)
         {
-            void callback(object state) => ConsoleWindow.ExtarctLinks(state as YanderePage);
-
-            if (YanderePage.IsPoolsPage(page))
-            {
-                foreach (var poolPage in page)
-                {
-                    ThreadPool.QueueUserWorkItem(callback, poolPage);
-                }
-            }
-            else
-            {
-                ThreadPool.QueueUserWorkItem(callback, page);
-            }
+            ThreadPool.QueueUserWorkItem(
+                state => ConsoleWindow.ExtarctLinks(state as YanderePage), page);
         }
 
         /// <summary>

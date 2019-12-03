@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="YandereSpider.Views.NaviWebBrowser"
+             x:Name="ThisControl" x:FieldModifier="private"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YandereSpider.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <WebBrowser x:Name="MainWebBrowser" x:FieldModifier="private" Grid.Row="1" Navigated="MainWebBrowser_Navigated"/>
+        <TextBox x:Name="SourceTextBox" x:FieldModifier="private" Grid.ColumnSpan="3" Margin="130,5,50,5"
+                 VerticalContentAlignment="Center" TextWrapping="NoWrap" FontSize="16"
+                 Text="{Binding Source, ElementName=ThisControl, UpdateSourceTrigger=Explicit}"
+                 KeyDown="SourceTextBox_KeyDown"/>
+        <Button Margin="5,5,0,5" HorizontalAlignment="Left" Height="35" Width="35"
+                Content="←" FontSize="16" IsEnabled="{Binding CanGoBack, ElementName=ThisControl}"
+                Command="NavigationCommands.BrowseBack"/>
+        <Button Margin="45,5,0,5" HorizontalAlignment="Left" Height="35" Width="35"
+                Content="→" FontSize="16" IsEnabled="{Binding CanGoForward, ElementName=UserControl}"
+                Command="NavigationCommands.BrowseForward"/>
+        <Button Margin="85,5,0,5" HorizontalAlignment="Left" Height="35" Width="35"
+                Content="🏠" FontSize="16" IsEnabled="True"
+                Command="NavigationCommands.BrowseHome"/>
+        <Button Grid.Column="1" Margin="0,5,5,5" HorizontalAlignment="Right" Height="35" Width="35"
+                Content="→" FontSize="16" IsEnabled="True"
+                Click="GoToButton_Click"
+                Command="NavigationCommands.GoToPage"
+                CommandParameter="{Binding Text, ElementName=SourceTextBox}"/>
+    </Grid>
+</UserControl>

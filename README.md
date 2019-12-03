@@ -1,10 +1,10 @@
-﻿# YandereSpider
+﻿# yande.re 图片链接提取工具
 
-获取 Y 站上最高质量图片链接的工具，仅提取链接，不提供下载功能。
+获取 Y 站最高质量图片链接的工具，仅提取链接，不提供下载功能。
 
 ## YandereSpider (WPF)
 
-新版 YandereSpider，使用 WPF 作为框架。面向对象，便于功能扩展。
+新版 YandereSpider，使用 WPF 作为框架。面向对象，使用 MVVM 模式设计，便于功能扩展。
 
 支持语言
 
@@ -15,7 +15,7 @@
 
 能够提取和遍历 Posts 页面（包括搜索结果）、Pool 页面和 Pools 页面。
 
-内含 `YandereSpider.YanderePage` 类，包含了目标站点页面的常见链接提取功能。
+内含 `YandereSpider.Models.YanderePage` 类，包含了目标站点页面的常见链接提取功能。
 
 ### 控制台模式
 
@@ -36,7 +36,7 @@ YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]
 
 完成图片链接的提取后，若链接数量小于 65536，则会将所有链接复制到剪贴板。
 
-### 类 `YandereSpider.YanderePage`
+### 类 `YandereSpider.Models.YanderePage`
 
 实现接口：
 
@@ -46,8 +46,6 @@ YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]
 
 包含了目标站点页面的常见链接提取功能，
 包括图片链接、（Pools 页面的）Pool 链接和上一页面与下一页面的链接。
-
-访问级别为公共 `public`，可通过引用 YandereSpider.exe 来访问此类。
 
 ## YandereSpider.WinForm
 

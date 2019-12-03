@@ -33,9 +33,9 @@ namespace YandereSpider.Properties
                         { nameof(MainWindow_Title), "yande.re 链接提取" },
                         { nameof(MainWindow_ExtractButton), "提取链接" },
                         { nameof(MainWindow_EnumerateButton), "遍历页面" },
+                        { nameof(MainWindow_CancelButton), "取消" },
                         { nameof(MainWindow_CopyButton), "复制到剪贴板" },
                         { nameof(MainWindow_ClearButton), "清除" },
-                        { nameof(MainWindow_CancelButton), "取消" },
                         { nameof(ConsoleWindow_Complete), "——完成！——" },
                         {
                             nameof(ConsoleWindow_Help_Usage),
@@ -72,9 +72,9 @@ namespace YandereSpider.Properties
                         { nameof(MainWindow_Title), "yande.re Link Extract" },
                         { nameof(MainWindow_ExtractButton), "Extract" },
                         { nameof(MainWindow_EnumerateButton), "Enumerate" },
+                        { nameof(MainWindow_CancelButton), "Cancel" },
                         { nameof(MainWindow_CopyButton), "Copy" },
                         { nameof(MainWindow_ClearButton), "Clear" },
-                        { nameof(MainWindow_CancelButton), "Cancel" },
                         { nameof(ConsoleWindow_Complete), "---Complete!---" },
                         {
                             nameof(ConsoleWindow_Help_Usage),
@@ -117,9 +117,9 @@ namespace YandereSpider.Properties
         public static string MainWindow_Title => LocalizedResources.Get<string>();
         public static string MainWindow_ExtractButton => LocalizedResources.Get<string>();
         public static string MainWindow_EnumerateButton => LocalizedResources.Get<string>();
+        public static string MainWindow_CancelButton => LocalizedResources.Get<string>();
         public static string MainWindow_CopyButton => LocalizedResources.Get<string>();
         public static string MainWindow_ClearButton => LocalizedResources.Get<string>();
-        public static string MainWindow_CancelButton => LocalizedResources.Get<string>();
         public static string ConsoleWindow_Help_Usage => LocalizedResources.Get<string>();
         public static string ConsoleWindow_Help_PageLink => LocalizedResources.Get<string>();
         public static string ConsoleWindow_Help_PageCount => LocalizedResources.Get<string>();

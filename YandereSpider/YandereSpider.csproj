@@ -62,16 +62,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Binding\Bindable.cs" />
-    <Compile Include="Binding\BindableObject.cs" />
-    <Compile Include="ConsoleWindow.cs" />
+    <Compile Include="Commands\CommandBase.cs" />
+    <Compile Include="Commands\DelegateCommand.cs" />
+    <Compile Include="Views\NaviWebBrowser.xaml.cs">
+      <DependentUpon>NaviWebBrowser.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConsoleWindow.cs" />
     <Compile Include="Helpers\ConsoleManager.cs" />
     <Compile Include="Helpers\ControlExtensions.cs" />
     <Compile Include="Helpers\ParamReader.cs" />
     <Compile Include="Helpers\SystemComponents.cs" />
+    <Compile Include="Bindings\ObservableBase.cs" />
+    <Compile Include="Bindings\ObservableObject.cs" />
+    <Compile Include="Bindings\ObservableStorage.cs" />
     <Compile Include="Properties\LocalizedResources.cs" />
-    <Compile Include="YanderePage.cs" />
-    <Page Include="MainWindow.xaml">
+    <Compile Include="ViewModels\MainWindowModel.cs" />
+    <Compile Include="Models\YanderePage.cs" />
+    <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -79,10 +86,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\NaviWebBrowser.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
