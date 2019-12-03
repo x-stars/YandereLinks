@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace YandereSpider.Models
+namespace YandereLinks.Models
 {
     /// <summary>
     /// 提供获取 yande.re 页面的内含链接的方法。
@@ -193,8 +193,8 @@ namespace YandereSpider.Models
         /// 获取当前对象，并检查当前对象是否已经被释放。
         /// </summary>
         /// <exception cref="ObjectDisposedException">当前对象已经被释放。</exception>
-        protected YanderePage Disposable =>
-            this.IsDisposed ? throw new ObjectDisposedException(null) : this;
+        protected YanderePage Disposable => this.IsDisposed ?
+            throw new ObjectDisposedException(this.GetType().ToString()) : this;
 
         /// <summary>
         /// 页面的链接。

@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using XstarS.Windows.Controls;
 
-namespace YandereSpider.Views
+namespace YandereLinks.Views
 {
     /// <summary>
     /// 表示一个带有导航控件的 <see cref="WebBrowser"/>。
@@ -164,6 +164,15 @@ namespace YandereSpider.Views
         }
 
         /// <summary>
+        /// 显式更新链接文本框的数据源。
+        /// </summary>
+        private void UpdateSourceTextBoxSource()
+        {
+            this.SourceTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            this.MainWebBrowser.Focus();
+        }
+
+        /// <summary>
         /// 网页浏览器导航完成的事件处理。
         /// </summary>
         /// <param name="sender">事件源。</param>
@@ -182,10 +191,10 @@ namespace YandereSpider.Views
         /// <param name="e">提供事件数据的对象。</param>
         private void SourceTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            switch (e.Key)
             {
-                this.SourceTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
-                this.Navigate(this.Source);
+                case Key.Enter: this.UpdateSourceTextBoxSource(); break;
+                default: break;
             }
         }
 
@@ -196,8 +205,7 @@ namespace YandereSpider.Views
         /// <param name="e">提供事件数据的对象。</param>
         private void GoToButton_Click(object sender, RoutedEventArgs e)
         {
-            this.SourceTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
-            this.Navigate(this.Source);
+            this.UpdateSourceTextBoxSource();
         }
     }
 }

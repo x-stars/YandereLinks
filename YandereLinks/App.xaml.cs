@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using YandereSpider.Views;
+using YandereLinks.Views;
 
-namespace YandereSpider
+namespace YandereLinks
 {
     /// <summary>
     /// App.xaml 的交互逻辑。

@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using XstarS.ComponentModel;
-using YandereSpider.Models;
+using YandereLinks.Models;
 
-namespace YandereSpider.ViewModels
+namespace YandereLinks.ViewModels
 {
     /// <summary>
     /// 表示主窗口的数据逻辑的模型。
@@ -125,7 +125,8 @@ namespace YandereSpider.ViewModels
                         this.ExtractImageLinks();
                         this.CanExtract = true;
                     }
-                }));
+                }),
+                () => this.CanExtract);
         }
 
         /// <summary>
@@ -158,7 +159,8 @@ namespace YandereSpider.ViewModels
                         }
                         this.CanExtract = true;
                     }
-                }));
+                }),
+                () => this.CanExtract);
         }
 
         /// <summary>
@@ -175,13 +177,14 @@ namespace YandereSpider.ViewModels
             return new DelegateCommand(
                 () =>
                 {
-                    if (!this.CanExtract)
+                    if (this.CanCancelExtract)
                     {
                         this.ExtractCancellationSource.Cancel();
                         this.ExtractCancellationSource = new CancellationTokenSource();
                         this.PageObject.Refresh();
                     }
-                });
+                },
+                () => this.CanCancelExtract);
         }
 
         /// <summary>
@@ -202,7 +205,8 @@ namespace YandereSpider.ViewModels
                     {
                         Clipboard.SetText(this.ImageLinks);
                     }
-                });
+                },
+                () => this.HasImageLinks);
         }
 
         /// <summary>
@@ -223,7 +227,8 @@ namespace YandereSpider.ViewModels
                     {
                         this.ImageLinks = string.Empty;
                     }
-                });
+                },
+                () => this.HasImageLinks);
         }
 
         /// <summary>
@@ -238,9 +243,18 @@ namespace YandereSpider.ViewModels
             {
                 case nameof(this.CanExtract):
                     this.NotifyPropertyChanged(nameof(this.CanCancelExtract));
+                    this.ExtractLinksCommand.NotifyCanExecuteChanged();
+                    this.EnumerateExtractLinksCommand.NotifyCanExecuteChanged();
+                    break;
+                case nameof(this.CanCancelExtract):
+                    this.CancelExtractLinksCommand.NotifyCanExecuteChanged();
                     break;
                 case nameof(this.ImageLinks):
                     this.NotifyPropertyChanged(nameof(this.HasImageLinks));
+                    break;
+                case nameof(this.HasImageLinks):
+                    this.CopyLinksCommand.NotifyCanExecuteChanged();
+                    this.ClearLinksCommand.NotifyCanExecuteChanged();
                     break;
                 default:
                     break;

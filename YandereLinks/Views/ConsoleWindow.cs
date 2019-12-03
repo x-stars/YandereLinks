@@ -5,9 +5,9 @@ using System.Threading;
 using System.Windows;
 using XstarS;
 using XstarS.Win32;
-using YandereSpider.Models;
+using YandereLinks.Models;
 
-namespace YandereSpider.Views
+namespace YandereLinks.Views
 {
     /// <summary>
     /// 控制台模式的运行逻辑。

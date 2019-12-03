@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
-namespace YandereSpider.Properties
+namespace YandereLinks.Properties
 {
     /// <summary>
     /// 提供应用程序的本地化资源。
@@ -39,7 +39,7 @@ namespace YandereSpider.Properties
                         { nameof(ConsoleWindow_Complete), "——完成！——" },
                         {
                             nameof(ConsoleWindow_Help_Usage),
-                            "YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
+                            "YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
                         },
                         {
                             nameof(ConsoleWindow_Help_PageLink),
@@ -78,7 +78,7 @@ namespace YandereSpider.Properties
                         { nameof(ConsoleWindow_Complete), "---Complete!---" },
                         {
                             nameof(ConsoleWindow_Help_Usage),
-                            "YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
+                            "YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
                         },
                         {
                             nameof(ConsoleWindow_Help_PageLink),
@@ -110,7 +110,7 @@ namespace YandereSpider.Properties
         /// <summary>
         /// 本地化资源支持的所有区域信息。
         /// </summary>
-        public static ICollection<CultureInfo> SupportedCulture =>
+        public static ICollection<CultureInfo> SupportedCultures =>
             LocalizedResources.InternalResources.Keys;
 
         #region 本地化资源对外接口。
@@ -132,15 +132,15 @@ namespace YandereSpider.Properties
         /// <summary>
         /// 根据当前区域信息和资源名称获取指定类型的资源的值。
         /// </summary>
-        /// <typeparam name="TRes">资源的类型。</typeparam>
+        /// <typeparam name="TResource">资源的类型。</typeparam>
         /// <param name="resourceName">资源的名称。可由编译器自动获取。</param>
         /// <returns><see cref="LocalizedResources.InternalResources"/>
         /// 中对应当前区域信息且名称为 <paramref name="resourceName"/> 的资源的值。</returns>
-        internal static TRes Get<TRes>([CallerMemberName] string resourceName = null) =>
+        internal static TResource Get<TResource>([CallerMemberName] string resourceName = null) =>
             LocalizedResources.InternalResources.ContainsKey(CultureInfo.CurrentUICulture) ?
-            (TRes)LocalizedResources.InternalResources[CultureInfo.CurrentUICulture][resourceName] :
+            (TResource)LocalizedResources.InternalResources[CultureInfo.CurrentUICulture][resourceName] :
             LocalizedResources.InternalResources.ContainsKey(CultureInfo.InvariantCulture) ?
-            (TRes)LocalizedResources.InternalResources[CultureInfo.InvariantCulture][resourceName] :
-            default(TRes);
+            (TResource)LocalizedResources.InternalResources[CultureInfo.InvariantCulture][resourceName] :
+            default(TResource);
     }
 }

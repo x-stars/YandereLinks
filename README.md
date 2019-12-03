@@ -2,7 +2,7 @@
 
 获取 Y 站最高质量图片链接的工具，仅提取链接，不提供下载功能。
 
-## YandereSpider
+## YandereLinks
 
 以 WPF 为 UI 框架，使用 MVVM 模式设计，便于功能扩展。
 
@@ -15,7 +15,7 @@
 
 能够提取和遍历 Posts 页面（包括搜索结果）、Pool 页面和 Pools 页面。
 
-内含 `YandereSpider.Models.YanderePage` 类，包含了目标站点页面的常见链接提取功能。
+内含 `YandereLinks.Models.YanderePage` 类，包含了目标站点页面的常见链接提取功能。
 
 ### 控制台模式
 
@@ -24,7 +24,7 @@
 
 控制台模式的启动参数说明如下。
 
-YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]
+YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]
 
 | 名称 | 内容       | 说明                                                              |
 | ---- | ---------- | ----------------------------------------------------------------- |
@@ -36,13 +36,13 @@ YandereSpider.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]
 
 完成图片链接的提取后，若链接数量小于 65536，则会将所有链接复制到剪贴板。
 
-### 类 `YandereSpider.Models.YanderePage`
+### 类 `YandereLinks.Models.YanderePage`
 
 实现接口：
 
 * `System.IDisposable`
-* `System.Collections.Generic.IReadOnlyList<out YandereSpider.YanderePage>`
-* `System.IEquatable<YandereSpider.YanderePage>`
+* `System.Collections.Generic.IReadOnlyList<out YandereLinks.YanderePage>`
+* `System.IEquatable<YandereLinks.YanderePage>`
 
 包含了目标站点页面的常见链接提取功能，
 包括图片链接、（Pools 页面的）Pool 链接和上一页面与下一页面的链接。
