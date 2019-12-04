@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{078D7136-874B-4FCC-9E8C-38CB5F6716A8}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>YandereLinks</RootNamespace>
+    <RootNamespace>XstarS.YandereLinks</RootNamespace>
     <AssemblyName>YandereLinks</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -80,7 +80,7 @@
     <Compile Include="Views\ConsoleWindow.cs" />
     <Compile Include="Helpers\ConsoleManager.cs" />
     <Compile Include="Helpers\ControlExtensions.cs" />
-    <Compile Include="Helpers\ParamReader.cs" />
+    <Compile Include="Helpers\ArgumentReader.cs" />
     <Compile Include="Helpers\SystemComponents.cs" />
     <Compile Include="Bindings\ObservableBase.cs" />
     <Compile Include="Bindings\ObservableObject.cs" />

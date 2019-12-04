@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Windows;
-using XstarS;
+using XstarS.CommandLine;
 using XstarS.Win32;
-using YandereLinks.Models;
+using XstarS.YandereLinks.Models;
 
-namespace YandereLinks.Views
+namespace XstarS.YandereLinks.Views
 {
     /// <summary>
     /// 控制台模式的运行逻辑。
@@ -66,7 +66,7 @@ namespace YandereLinks.Views
             if (ConsoleWindow.IsStarted) { return; }
             else { ConsoleWindow.IsStarted = true; }
 
-            var param = new ParamReader(args, true, new[] { "-e", "-t", "-o" }, new[] { "-h" });
+            var param = new ArgumentReader(args, true, new[] { "-e", "-t", "-o" }, new[] { "-h" });
             if (param.GetSwitch("-h"))
             {
                 ConsoleWindow.ShowHelp();
@@ -76,7 +76,7 @@ namespace YandereLinks.Views
                 var pages = new List<YanderePage>();
                 for (int i = 0; i <= ushort.MaxValue; i++)
                 {
-                    var pageLink = param.GetParam(i);
+                    var pageLink = param.GetParameter(i);
                     if (pageLink is null) { break; }
                     pageLink = ConsoleWindow.FormatPageLink(pageLink);
                     var page = new YanderePage(pageLink);
@@ -88,11 +88,11 @@ namespace YandereLinks.Views
                 }
                 if (pages.Count == 0) { pages.Add(new YanderePage(YanderePage.IndexPageLink)); }
 
-                int enumCount = int.Parse(param.GetParam("-e") ?? 0.ToString());
+                int enumCount = int.Parse(param.GetParameter("-e") ?? 0.ToString());
 
-                if (!(param.GetParam("-t") is null))
+                if (!(param.GetParameter("-t") is null))
                 {
-                    int maxThreads = int.Parse(param.GetParam("-t"));
+                    int maxThreads = int.Parse(param.GetParameter("-t"));
                     if (maxThreads < 1)
                     {
                         throw new ArgumentOutOfRangeException("-t MaxThreads");
@@ -100,9 +100,9 @@ namespace YandereLinks.Views
                     ThreadPool.SetMaxThreads(maxThreads, maxThreads);
                 }
 
-                if (!(param.GetParam("-o") is null))
+                if (!(param.GetParameter("-o") is null))
                 {
-                    ConsoleWindow.OutFile = Path.GetFullPath(param.GetParam("-o"));
+                    ConsoleWindow.OutFile = Path.GetFullPath(param.GetParameter("-o"));
                     if (!Directory.Exists(Path.GetDirectoryName(ConsoleWindow.OutFile)))
                     {
                         throw new DirectoryNotFoundException();

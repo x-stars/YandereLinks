@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using XstarS.Windows.Controls;
 
-namespace YandereLinks.Views
+namespace XstarS.YandereLinks.Views
 {
     /// <summary>
     /// 表示一个带有导航控件的 <see cref="WebBrowser"/>。
@@ -131,7 +131,7 @@ namespace YandereLinks.Views
                 var source = e.NewValue as string;
                 if (this.MainWebBrowser.Source?.OriginalString != source)
                 {
-                    this.Navigate(source);
+                    this.MainWebBrowser.Navigate(source);
                 }
             }
         }
@@ -169,6 +169,7 @@ namespace YandereLinks.Views
         private void UpdateSourceTextBoxSource()
         {
             this.SourceTextBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            this.MainWebBrowser.Navigate(this.Source);
             this.MainWebBrowser.Focus();
         }
 

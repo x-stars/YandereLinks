@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using XstarS.ComponentModel;
-using YandereLinks.Models;
+using XstarS.YandereLinks.Models;
 
-namespace YandereLinks.ViewModels
+namespace XstarS.YandereLinks.ViewModels
 {
     /// <summary>
     /// 表示主窗口的数据逻辑的模型。

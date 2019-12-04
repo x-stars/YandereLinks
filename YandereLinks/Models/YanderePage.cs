@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace YandereLinks.Models
+namespace XstarS.YandereLinks.Models
 {
     /// <summary>
     /// 提供获取 yande.re 页面的内含链接的方法。

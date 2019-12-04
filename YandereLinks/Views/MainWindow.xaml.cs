@@ -4,9 +4,9 @@ using System.Security;
 using System.Windows;
 using System.Windows.Input;
 using XstarS.Win32;
-using YandereLinks.ViewModels;
+using XstarS.YandereLinks.ViewModels;
 
-namespace YandereLinks.Views
+namespace XstarS.YandereLinks.Views
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑。

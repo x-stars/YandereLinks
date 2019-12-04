@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
-namespace YandereLinks.Properties
+namespace XstarS.YandereLinks.Properties
 {
     /// <summary>
     /// 提供应用程序的本地化资源。
@@ -39,7 +39,7 @@ namespace YandereLinks.Properties
                         { nameof(ConsoleWindow_Complete), "——完成！——" },
                         {
                             nameof(ConsoleWindow_Help_Usage),
-                            "YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
+                            "XstarS.YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
                         },
                         {
                             nameof(ConsoleWindow_Help_PageLink),
@@ -78,7 +78,7 @@ namespace YandereLinks.Properties
                         { nameof(ConsoleWindow_Complete), "---Complete!---" },
                         {
                             nameof(ConsoleWindow_Help_Usage),
-                            "YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
+                            "XstarS.YandereLinks.exe PageLink [-e PageCount] [-t MaxThreads] [-o OutFile] [-h]"
                         },
                         {
                             nameof(ConsoleWindow_Help_PageLink),

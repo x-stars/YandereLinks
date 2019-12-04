@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using YandereLinks.Views;
+using XstarS.YandereLinks.Views;
 
-namespace YandereLinks
+namespace XstarS.YandereLinks
 {
     /// <summary>
     /// App.xaml 的交互逻辑。
