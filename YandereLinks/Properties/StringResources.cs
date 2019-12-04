@@ -6,35 +6,35 @@ using System.Runtime.CompilerServices;
 namespace XstarS.YandereLinks.Properties
 {
     /// <summary>
-    /// 提供应用程序的本地化资源。
+    /// 提供应用程序的字符串资源。
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-    internal static class LocalizedResources
+    internal static class StringResources
     {
         /// <summary>
-        /// 本地化资源内部存储。
+        /// 字符串资源内部存储。
         /// </summary>
-        private static readonly IDictionary<CultureInfo, IDictionary<string, object>> InternalResources;
+        private static readonly Dictionary<CultureInfo, Dictionary<string, string>> StringStorage;
 
         /// <summary>
-        /// 初始化 <see cref="LocalizedResources"/> 类的静态成员。
+        /// 初始化 <see cref="StringResources"/> 类的静态成员。
         /// </summary>
-        static LocalizedResources()
+        static StringResources()
         {
-            LocalizedResources.InternalResources = new Dictionary<CultureInfo, IDictionary<string, object>>()
+            StringResources.StringStorage = new Dictionary<CultureInfo, Dictionary<string, string>>()
             {
                 {
                     new CultureInfo("zh-CN"),
-                    new Dictionary<string, object>()
+                    new Dictionary<string, string>()
                     {
                         { nameof(MainWindow_Title), "yande.re 链接提取" },
                         { nameof(MainWindow_ExtractButton), "提取链接" },
                         { nameof(MainWindow_EnumerateButton), "遍历页面" },
                         { nameof(MainWindow_CancelButton), "取消" },
-                        { nameof(MainWindow_CopyButton), "复制到剪贴板" },
+                        { nameof(MainWindow_CopyButton), "复制" },
                         { nameof(MainWindow_ClearButton), "清除" },
                         { nameof(ConsoleWindow_Complete), "——完成！——" },
                         {
@@ -67,7 +67,7 @@ namespace XstarS.YandereLinks.Properties
                 },
                 {
                     CultureInfo.InvariantCulture,
-                    new Dictionary<string, object>()
+                    new Dictionary<string, string>()
                     {
                         { nameof(MainWindow_Title), "yande.re Link Extract" },
                         { nameof(MainWindow_ExtractButton), "Extract" },
@@ -108,39 +108,38 @@ namespace XstarS.YandereLinks.Properties
         }
 
         /// <summary>
-        /// 本地化资源支持的所有区域信息。
+        /// 字符串资源支持的所有区域信息。
         /// </summary>
         public static ICollection<CultureInfo> SupportedCultures =>
-            LocalizedResources.InternalResources.Keys;
-
-        #region 本地化资源对外接口。
-        public static string MainWindow_Title => LocalizedResources.Get<string>();
-        public static string MainWindow_ExtractButton => LocalizedResources.Get<string>();
-        public static string MainWindow_EnumerateButton => LocalizedResources.Get<string>();
-        public static string MainWindow_CancelButton => LocalizedResources.Get<string>();
-        public static string MainWindow_CopyButton => LocalizedResources.Get<string>();
-        public static string MainWindow_ClearButton => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Help_Usage => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Help_PageLink => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Help_PageCount => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Help_MaxThreads => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Help_OutFile => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Help_Help => LocalizedResources.Get<string>();
-        public static string ConsoleWindow_Complete => LocalizedResources.Get<string>();
-        #endregion
+            StringResources.StringStorage.Keys;
 
         /// <summary>
-        /// 根据当前区域信息和资源名称获取指定类型的资源的值。
+        /// 根据当前区域信息和资源名称获取指定类型的字符串资源的值。
         /// </summary>
-        /// <typeparam name="TResource">资源的类型。</typeparam>
-        /// <param name="resourceName">资源的名称。可由编译器自动获取。</param>
-        /// <returns><see cref="LocalizedResources.InternalResources"/>
-        /// 中对应当前区域信息且名称为 <paramref name="resourceName"/> 的资源的值。</returns>
-        internal static TResource Get<TResource>([CallerMemberName] string resourceName = null) =>
-            LocalizedResources.InternalResources.ContainsKey(CultureInfo.CurrentUICulture) ?
-            (TResource)LocalizedResources.InternalResources[CultureInfo.CurrentUICulture][resourceName] :
-            LocalizedResources.InternalResources.ContainsKey(CultureInfo.InvariantCulture) ?
-            (TResource)LocalizedResources.InternalResources[CultureInfo.InvariantCulture][resourceName] :
-            default(TResource);
+        /// <param name="resourceName">字符串资源的名称。可由编译器自动获取。</param>
+        /// <returns><see cref="StringResources.StringStorage"/>
+        /// 中对应当前区域信息且名称为 <paramref name="resourceName"/> 的字符串资源的值。</returns>
+        internal static string GetString([CallerMemberName] string resourceName = null) =>
+            StringResources.StringStorage.ContainsKey(CultureInfo.CurrentUICulture) ?
+            StringResources.StringStorage[CultureInfo.CurrentUICulture][resourceName] :
+            StringResources.StringStorage.ContainsKey(CultureInfo.InvariantCulture) ?
+            StringResources.StringStorage[CultureInfo.InvariantCulture][resourceName] :
+            string.Empty;
+
+        #region 字符串资源对外接口。
+        public static string MainWindow_Title => StringResources.GetString();
+        public static string MainWindow_ExtractButton => StringResources.GetString();
+        public static string MainWindow_EnumerateButton => StringResources.GetString();
+        public static string MainWindow_CancelButton => StringResources.GetString();
+        public static string MainWindow_CopyButton => StringResources.GetString();
+        public static string MainWindow_ClearButton => StringResources.GetString();
+        public static string ConsoleWindow_Help_Usage => StringResources.GetString();
+        public static string ConsoleWindow_Help_PageLink => StringResources.GetString();
+        public static string ConsoleWindow_Help_PageCount => StringResources.GetString();
+        public static string ConsoleWindow_Help_MaxThreads => StringResources.GetString();
+        public static string ConsoleWindow_Help_OutFile => StringResources.GetString();
+        public static string ConsoleWindow_Help_Help => StringResources.GetString();
+        public static string ConsoleWindow_Complete => StringResources.GetString();
+        #endregion
     }
 }

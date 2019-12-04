@@ -162,29 +162,6 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// 获取当前页面能够直接导航的页面中指定索引处的页面。
-        /// </summary>
-        /// <param name="index">页面的索引。0 代表当前页面，
-        /// 除此之外的索引应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
-        /// <returns>当前页面能够直接导航的页面中指定索引处的页面，
-        /// <paramref name="index"/> 为 0 时则为当前页面。</returns>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="index"/> 不在 0 到
-        /// <see cref="YanderePage.Count"/> 之间。</exception>
-        public YanderePage this[int index]
-        {
-            get
-            {
-                if ((index < 0) || (index > this.Count))
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                }
-
-                return this.PageAt(index);
-            }
-        }
-
-        /// <summary>
         /// 指示当前对象是否已经被释放。
         /// </summary>
         protected bool IsDisposed { get; private set; } = false;
@@ -245,6 +222,29 @@ namespace XstarS.YandereLinks.Models
                     this.Refresh();
                     return this.DocumentText;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 获取当前页面能够直接导航的页面中指定索引处的页面。
+        /// </summary>
+        /// <param name="index">页面的索引。0 代表当前页面，
+        /// 除此之外的索引应在 1 和 <see cref="YanderePage.Count"/> 之间。</param>
+        /// <returns>当前页面能够直接导航的页面中指定索引处的页面，
+        /// <paramref name="index"/> 为 0 时则为当前页面。</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> 不在 0 到
+        /// <see cref="YanderePage.Count"/> 之间。</exception>
+        public YanderePage this[int index]
+        {
+            get
+            {
+                if ((index < 0) || (index > this.Count))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                return this.PageAt(index);
             }
         }
 
@@ -474,25 +474,6 @@ namespace XstarS.YandereLinks.Models
             page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
         /// <summary>
-        /// 重新获取当前页面的 HTML 文本以刷新内容。
-        /// </summary>
-        public virtual void Refresh()
-        {
-            this.Cancel();
-            this.DocumentTextTask?.Dispose();
-            this.DocumentTextTask = this.HttpClient?.GetStringAsync(this.PageLink);
-        }
-
-        /// <summary>
-        /// 立刻停止所有 HTTP 传输任务。
-        /// </summary>
-        public virtual void Cancel()
-        {
-            this.HttpClient?.CancelPendingRequests();
-            try { this.DocumentTextTask?.Wait(); } catch { }
-        }
-
-        /// <summary>
         /// 获取当前页面能够直接导航的页面中指定索引处的页面。不执行索引越界检查。
         /// </summary>
         /// <param name="index">页面的索引。0 代表当前页面，
@@ -539,12 +520,22 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// 释放此实例占用的资源。
+        /// 重新获取当前页面的 HTML 文本以刷新内容。
         /// </summary>
-        public void Dispose()
+        public virtual void Refresh()
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            this.Cancel();
+            this.DocumentTextTask?.Dispose();
+            this.DocumentTextTask = this.HttpClient?.GetStringAsync(this.PageLink);
+        }
+
+        /// <summary>
+        /// 立刻停止所有 HTTP 传输任务。
+        /// </summary>
+        public virtual void Cancel()
+        {
+            this.HttpClient?.CancelPendingRequests();
+            try { this.DocumentTextTask?.Wait(); } catch { }
         }
 
         /// <summary>
@@ -552,6 +543,15 @@ namespace XstarS.YandereLinks.Models
         /// </summary>
         /// <returns>当前页面的链接。</returns>
         public override string ToString() => this.PageLink.ToString();
+
+        /// <summary>
+        /// 释放此实例占用的资源。
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// 释放当前实例占用的非托管资源，并根据指示释放托管资源。

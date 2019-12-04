@@ -6,41 +6,52 @@
         xmlns:local="clr-namespace:XstarS.YandereLinks.Views"
         xmlns:props="clr-namespace:XstarS.YandereLinks.Properties"
         mc:Ignorable="d"
-        Height="720" Width="1280" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen"
-        Title="{x:Static props:LocalizedResources.MainWindow_Title}" Icon="../Properties/YandereLinks.ico"
+        Height="720" Width="1280" MinHeight="450" MinWidth="800" WindowStartupLocation="CenterScreen"
+        Title="{x:Static props:StringResources.MainWindow_Title}" Icon="../Properties/YandereLinks.ico"
         Loaded="ThisWindow_Loaded" KeyDown="ThisWindow_KeyDown">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="130"/>
-            <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="5"/>
-            <RowDefinition Height="180" MinHeight="180" MaxHeight="360"/>
+            <RowDefinition Height="160" MinHeight="160" MaxHeight="320"/>
         </Grid.RowDefinitions>
-        <local:NaviWebBrowser Grid.ColumnSpan="2"
-                              HomeSource="{Binding HomePageLink, Mode=OneTime}"
+        <local:NaviWebBrowser HomeSource="{Binding HomePageLink, Mode=OneTime}"
                               Source="{Binding PageLink, Mode=TwoWay}"/>
-        <GridSplitter Grid.Row="1" Grid.ColumnSpan="2" VerticalContentAlignment="Center"
+        <GridSplitter Grid.Row="1" VerticalContentAlignment="Center"
                       HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"/>
-        <Button Margin="5,5,5,0" Height="30" Grid.Row="2" VerticalAlignment="Top"
-                Content="{x:Static props:LocalizedResources.MainWindow_ExtractButton}"
-                IsEnabled="{Binding CanExtract}" Command="{Binding ExtractLinksCommand}"/>
-        <Button Margin="5,40,5,0" Height="30" Grid.Row="2" VerticalAlignment="Top"
-                Content="{x:Static props:LocalizedResources.MainWindow_EnumerateButton}"
-                IsEnabled="{Binding CanExtract}" Command="{Binding EnumerateExtractLinksCommand}"/>
-        <Button Margin="5,75,5,0" Height="30" Grid.Row="2" VerticalAlignment="Top"
-                Content="{x:Static props:LocalizedResources.MainWindow_CancelButton}"
-                IsEnabled="{Binding CanCancelExtract}" Command="{Binding CancelExtractLinksCommand}"/>
-        <Button Margin="5,0,5,40" Height="30" Grid.Row="2" VerticalAlignment="Bottom"
-                Content="{x:Static props:LocalizedResources.MainWindow_CopyButton}"
-                IsEnabled="{Binding HasImageLinks}" Command="{Binding CopyLinksCommand}"/>
-        <Button Margin="5,0,5,5" Height="30" Grid.Row="2" VerticalAlignment="Bottom"
-                Content="{x:Static props:LocalizedResources.MainWindow_ClearButton}"
-                IsEnabled="{Binding HasImageLinks}" Command="{Binding ClearLinksCommand}"/>
-        <TextBox Grid.Column="1" Grid.Row="2"
-                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                 TextWrapping="NoWrap" Text="{Binding ImageLinks}" IsReadOnly="True"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="1"
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                     TextWrapping="NoWrap" Text="{Binding ImageLinks}" IsReadOnly="True"/>
+            <Grid Margin="2.5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Button Grid.Row="0" Margin="2.5"
+                        Content="{x:Static props:StringResources.MainWindow_ExtractButton}"
+                        IsEnabled="{Binding CanExtract}" Command="{Binding ExtractLinksCommand}"/>
+                <Button Grid.Row="1" Margin="2.5"
+                        Content="{x:Static props:StringResources.MainWindow_EnumerateButton}"
+                        IsEnabled="{Binding CanExtract}" Command="{Binding EnumerateExtractLinksCommand}"/>
+                <Button Grid.Row="2" Margin="2.5"
+                        Content="{x:Static props:StringResources.MainWindow_CancelButton}"
+                        IsEnabled="{Binding CanCancelExtract}" Command="{Binding CancelExtractLinksCommand}"/>
+                <Button Grid.Row="4" Margin="2.5"
+                        Content="{x:Static props:StringResources.MainWindow_CopyButton}"
+                        IsEnabled="{Binding HasImageLinks}" Command="{Binding CopyLinksCommand}"/>
+                <Button Grid.Row="5" Margin="2.5"
+                        Content="{x:Static props:StringResources.MainWindow_ClearButton}"
+                        IsEnabled="{Binding HasImageLinks}" Command="{Binding ClearLinksCommand}"/>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

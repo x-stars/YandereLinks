@@ -25,7 +25,7 @@ namespace XstarS.YandereLinks.ViewModels
             this.CopyLinksCommand = this.CreateCopyLinksCommand();
             this.ClearLinksCommand = this.CreateClearLinksCommand();
 
-            this.PageLink = YanderePage.IndexPageLink;
+            this.PageLink = this.HomePageLink;
             this.ImageLinks = string.Empty;
             this.CanExtract = true;
         }
@@ -84,7 +84,7 @@ namespace XstarS.YandereLinks.ViewModels
         /// <summary>
         /// 表示发送取消提取图片链接信号的信号源。
         /// </summary>
-        private CancellationTokenSource ExtractCancellationSource;
+        private CancellationTokenSource ExtractCancellationSource { get; set; }
 
         /// <summary>
         /// 提取当前页面包含的图片链接。

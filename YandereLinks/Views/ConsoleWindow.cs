@@ -124,7 +124,7 @@ namespace XstarS.YandereLinks.Views
 
                 Console.WriteLine();
                 Console.WriteLine();
-                Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Complete);
+                Console.WriteLine(Properties.StringResources.ConsoleWindow_Complete);
                 Console.ReadKey();
             }
         }
@@ -156,13 +156,13 @@ namespace XstarS.YandereLinks.Views
         private static void ShowHelp()
         {
             Console.WriteLine();
-            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_Usage);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_Usage);
             Console.WriteLine();
-            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_PageLink);
-            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_PageCount);
-            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_MaxThreads);
-            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_OutFile);
-            Console.WriteLine(Properties.LocalizedResources.ConsoleWindow_Help_Help);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_PageLink);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_PageCount);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_MaxThreads);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_OutFile);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_Help);
             Console.WriteLine();
         }
 

@@ -5,28 +5,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:XstarS.YandereLinks.Views"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800" FontSize="14">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="45"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <WebBrowser x:Name="MainWebBrowser" x:FieldModifier="private" Grid.Row="1"
-                    Navigated="MainWebBrowser_Navigated"/>
-        <TextBox x:Name="SourceTextBox" x:FieldModifier="private" Margin="130,5,50,5"
-                 VerticalContentAlignment="Center" TextWrapping="NoWrap" FontSize="16"
-                 Text="{Binding Source, ElementName=ThisControl, UpdateSourceTrigger=Explicit}"
-                 KeyDown="SourceTextBox_KeyDown"/>
-        <Button Margin="5,5,0,5" HorizontalAlignment="Left" Height="35" Width="35"
-                Content="←" FontSize="16" Command="NavigationCommands.BrowseBack"
-                IsEnabled="{Binding CanGoBack, ElementName=ThisControl}"/>
-        <Button Margin="45,5,0,5" HorizontalAlignment="Left" Height="35" Width="35"
-                Content="→" FontSize="16" Command="NavigationCommands.BrowseForward"
-                IsEnabled="{Binding CanGoForward, ElementName=ThisControl}"/>
-        <Button Margin="85,5,0,5" HorizontalAlignment="Left" Height="35" Width="35"
-                Content="🏠" FontSize="16" Command="NavigationCommands.BrowseHome"/>
-        <Button Grid.Column="1" Margin="0,5,5,5" HorizontalAlignment="Right" Height="35" Width="35"
-                Content="→" FontSize="16" Click="GoToButton_Click"/>
+        <WebBrowser x:Name="MainWebBrowser" x:FieldModifier="private"
+                    Grid.Row="1" Navigated="MainWebBrowser_Navigated"/>
+        <Grid Margin="2.5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="35"/>
+                <ColumnDefinition Width="35"/>
+                <ColumnDefinition Width="35"/>
+                <ColumnDefinition Width="35"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="35"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="SourceTextBox" x:FieldModifier="private"
+                     Grid.Column="4" Margin="7.5,2.5"
+                     VerticalContentAlignment="Center" TextWrapping="NoWrap"
+                     Text="{Binding Source, ElementName=ThisControl, UpdateSourceTrigger=Explicit}"
+                     KeyDown="SourceTextBox_KeyDown"/>
+            <Button Grid.Column="0" Margin="2.5"
+                    Content="↩" Command="NavigationCommands.BrowseBack"
+                    IsEnabled="{Binding CanGoBack, ElementName=ThisControl}"/>
+            <Button Grid.Column="1" Margin="2.5"
+                    Content="↪" Command="NavigationCommands.BrowseForward"
+                    IsEnabled="{Binding CanGoForward, ElementName=ThisControl}"/>
+            <Button Grid.Column="2" Margin="2.5"
+                    Content="🔄" Command="NavigationCommands.Refresh"/>
+            <Button Grid.Column="3" Margin="2.5"
+                    Content="🏠" Command="NavigationCommands.BrowseHome"/>
+            <Button Grid.Column="5" Margin="2.5"
+                    Content="✔" Click="GoToButton_Click"/>
+        </Grid>
     </Grid>
 </UserControl>
