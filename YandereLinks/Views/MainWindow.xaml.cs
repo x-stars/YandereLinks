@@ -34,6 +34,8 @@ namespace XstarS.YandereLinks.Views
         /// <summary>
         /// 尝试将内置网页浏览器的版本设定为当前系统支持的最新版本。
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void TrySetWebBrowserVersion()
         {
             try

@@ -199,6 +199,8 @@ namespace XstarS.YandereLinks.Models
         /// <summary>
         /// 页面的 HTML 文本。
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public virtual string DocumentText
         {
             get
@@ -217,7 +219,7 @@ namespace XstarS.YandereLinks.Models
                 {
                     return string.Empty;
                 }
-                catch
+                catch (Exception)
                 {
                     this.Refresh();
                     return this.DocumentText;
@@ -532,6 +534,8 @@ namespace XstarS.YandereLinks.Models
         /// <summary>
         /// 立刻停止所有 HTTP 传输任务。
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public virtual void Cancel()
         {
             this.HttpClient?.CancelPendingRequests();
