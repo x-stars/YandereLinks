@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Security;
 using System.Windows;
-using System.Windows.Input;
 using XstarS.Win32;
 using XstarS.YandereLinks.ViewModels;
 
@@ -29,6 +28,14 @@ namespace XstarS.YandereLinks.Views
         /// <param name="e">提供事件数据的对象。</param>
         private void ThisWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            this.TrySetWebBrowserVersion();
+        }
+
+        /// <summary>
+        /// 尝试将内置网页浏览器的版本设定为当前系统支持的最新版本。
+        /// </summary>
+        private void TrySetWebBrowserVersion()
+        {
             try
             {
                 var destVersion = SystemComponents.InternetExplorer.MajorVersion;
@@ -48,28 +55,6 @@ namespace XstarS.YandereLinks.Views
             catch (Exception ex)
             {
                 MessageBox.Show(ex.GetType().ToString() + Environment.NewLine + ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// 当前窗口按键按下的事件处理。
-        /// </summary>
-        /// <param name="sender">事件源。</param>
-        /// <param name="e">提供事件数据的对象。</param>
-        private void ThisWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) ==
-                ModifierKeys.Control)
-            {
-                var model = this.DataContext as MainWindowModel;
-                switch (e.Key)
-                {
-                    case Key.E: model.ExtractLinksCommand.Execute(); break;
-                    case Key.R: model.EnumerateExtractLinksCommand.Execute(); break;
-                    case Key.C: model.CopyLinksCommand.Execute(); break;
-                    case Key.X: model.ClearLinksCommand.Execute(); break;
-                    default: break;
-                }
             }
         }
     }

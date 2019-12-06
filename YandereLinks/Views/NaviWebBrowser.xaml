@@ -26,20 +26,18 @@
             <TextBox x:Name="SourceTextBox" x:FieldModifier="private"
                      Grid.Column="4" Margin="7.5,2.5"
                      VerticalContentAlignment="Center" TextWrapping="NoWrap"
-                     Text="{Binding Source, ElementName=ThisControl, UpdateSourceTrigger=Explicit}"
-                     KeyDown="SourceTextBox_KeyDown"/>
+                     Text="{Binding Source, ElementName=ThisControl, UpdateSourceTrigger=Explicit}"/>
             <Button Grid.Column="0" Margin="2.5"
-                    Content="↩" Command="NavigationCommands.BrowseBack"
-                    IsEnabled="{Binding CanGoBack, ElementName=ThisControl}"/>
+                    Content="↩" Command="{x:Static NavigationCommands.BrowseBack}"/>
             <Button Grid.Column="1" Margin="2.5"
-                    Content="↪" Command="NavigationCommands.BrowseForward"
-                    IsEnabled="{Binding CanGoForward, ElementName=ThisControl}"/>
+                    Content="↪" Command="{x:Static NavigationCommands.BrowseForward}"/>
             <Button Grid.Column="2" Margin="2.5"
-                    Content="🔄" Command="NavigationCommands.Refresh"/>
+                    Content="🔄" Command="{x:Static NavigationCommands.Refresh}"/>
             <Button Grid.Column="3" Margin="2.5"
-                    Content="🏠" Command="NavigationCommands.BrowseHome"/>
+                    Content="🏠" Command="{x:Static NavigationCommands.BrowseHome}"/>
             <Button Grid.Column="5" Margin="2.5"
-                    Content="✔" Click="GoToButton_Click"/>
+                    Content="✔" Command="{x:Static EditingCommands.EnterParagraphBreak}"
+                    CommandTarget="{Binding ElementName=SourceTextBox}"/>
         </Grid>
     </Grid>
 </UserControl>

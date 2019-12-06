@@ -8,7 +8,14 @@
         mc:Ignorable="d"
         Height="720" Width="1280" MinHeight="450" MinWidth="800" WindowStartupLocation="CenterScreen"
         Title="{x:Static props:StringResources.MainWindow_Title}" Icon="../Properties/YandereLinks.ico"
-        Loaded="ThisWindow_Loaded" KeyDown="ThisWindow_KeyDown">
+        Loaded="ThisWindow_Loaded">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="E" Command="{Binding ExtractLinksCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="R" Command="{Binding EnumerateExtractLinksCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding CancelExtractLinksCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding CopyLinksCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="X" Command="{Binding ClearLinksCommand}"/>
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
@@ -38,19 +45,19 @@
                 </Grid.RowDefinitions>
                 <Button Grid.Row="0" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_ExtractButton}"
-                        IsEnabled="{Binding CanExtract}" Command="{Binding ExtractLinksCommand}"/>
+                        Command="{Binding ExtractLinksCommand}"/>
                 <Button Grid.Row="1" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_EnumerateButton}"
-                        IsEnabled="{Binding CanExtract}" Command="{Binding EnumerateExtractLinksCommand}"/>
+                        Command="{Binding EnumerateExtractLinksCommand}"/>
                 <Button Grid.Row="2" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_CancelButton}"
-                        IsEnabled="{Binding CanCancelExtract}" Command="{Binding CancelExtractLinksCommand}"/>
+                        Command="{Binding CancelExtractLinksCommand}"/>
                 <Button Grid.Row="4" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_CopyButton}"
-                        IsEnabled="{Binding HasImageLinks}" Command="{Binding CopyLinksCommand}"/>
+                        Command="{Binding CopyLinksCommand}"/>
                 <Button Grid.Row="5" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_ClearButton}"
-                        IsEnabled="{Binding HasImageLinks}" Command="{Binding ClearLinksCommand}"/>
+                        Command="{Binding ClearLinksCommand}"/>
             </Grid>
         </Grid>
     </Grid>

@@ -35,7 +35,7 @@ namespace XstarS.YandereLinks.Views
         private static string OutFile = null;
 
         /// <summary>
-        /// 所有图片的链接。
+        /// 已提取的图片链接。
         /// </summary>
         private static readonly ICollection<string> ImageLinks = new HashSet<string>();
 
@@ -170,7 +170,7 @@ namespace XstarS.YandereLinks.Views
         /// 提取页面中包含的图片链接。
         /// </summary>
         /// <param name="page">页面连接提取对象。</param>
-        private static void ExtarctLinks(YanderePage page)
+        private static void ExtractLinks(YanderePage page)
         {
             lock (ConsoleWindow.SyncRoot)
             {
@@ -206,17 +206,29 @@ namespace XstarS.YandereLinks.Views
         }
 
         /// <summary>
-        /// 提取页面及其子页面中包含的图片链接。
+        /// 提取页面中包含的图片链接的线程池回调方法。
+        /// </summary>
+        /// <param name="state">包含回调方法要使用的信息的对象，
+        /// 应为 <see cref="YanderePage"/>。</param>
+        private static void OnExtractLinks(object state)
+        {
+            if (state is YanderePage page)
+            {
+                ConsoleWindow.ExtractLinks(page);
+            }
+        }
+
+        /// <summary>
+        /// 异步提取页面中包含的图片链接。
         /// </summary>
         /// <param name="page">页面链接提取对象。</param>
         private static void ExtractPage(YanderePage page)
         {
-            ThreadPool.QueueUserWorkItem(
-                state => ConsoleWindow.ExtarctLinks(state as YanderePage), page);
+            ThreadPool.QueueUserWorkItem(ConsoleWindow.OnExtractLinks, page);
         }
 
         /// <summary>
-        /// 遍历并提取各个页面的图片链接。
+        /// 异步遍历并提取各个页面的图片链接。
         /// </summary>
         /// <param name="page">页面链接提取对象。</param>
         /// <param name="enumCount">指定遍历的页面数量；
