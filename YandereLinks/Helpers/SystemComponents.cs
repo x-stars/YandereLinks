@@ -28,7 +28,7 @@ namespace XstarS.Win32
                     using (var regKeyIE = Registry.LocalMachine.OpenSubKey(
                         @"SOFTWARE\Microsoft\Internet Explorer"))
                     {
-                        string versionSz = (regKeyIE.GetValue("svcVersion") ??
+                        var versionSz = (regKeyIE.GetValue("svcVersion") ??
                             regKeyIE.GetValue("Version")) as string;
                         return (versionSz is null) ? null : new Version(versionSz);
                     }
@@ -67,7 +67,7 @@ namespace XstarS.Win32
                         @"SOFTWARE\Microsoft\Internet Explorer\" +
                         @"MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", false))
                     {
-                        string appName = AppDomain.CurrentDomain.FriendlyName;
+                        var appName = AppDomain.CurrentDomain.FriendlyName;
                         return regKeyBrowser.GetValue(appName) as int?;
                     }
                 }
@@ -84,7 +84,7 @@ namespace XstarS.Win32
                         @"SOFTWARE\Microsoft\Internet Explorer\" +
                         @"MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", true))
                     {
-                        string appName = AppDomain.CurrentDomain.FriendlyName;
+                        var appName = AppDomain.CurrentDomain.FriendlyName;
                         if (value is null)
                         {
                             regKeyBrowser.DeleteValue(appName);
@@ -131,7 +131,7 @@ namespace XstarS.Win32
                         @"SOFTWARE\Microsoft\Internet Explorer\" +
                         @"MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", false))
                     {
-                        string appName = AppDomain.CurrentDomain.FriendlyName;
+                        var appName = AppDomain.CurrentDomain.FriendlyName;
                         return regKeyBrowser.GetValue(appName) as int?;
                     }
                 }
@@ -148,7 +148,7 @@ namespace XstarS.Win32
                         @"SOFTWARE\Microsoft\Internet Explorer\" +
                         @"MAIN\FeatureControl\FEATURE_BROWSER_EMULATION", true))
                     {
-                        string appName = AppDomain.CurrentDomain.FriendlyName;
+                        var appName = AppDomain.CurrentDomain.FriendlyName;
                         if (value is null)
                         {
                             regKeyBrowser.DeleteValue(appName);

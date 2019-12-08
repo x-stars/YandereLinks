@@ -37,7 +37,7 @@ namespace XstarS.YandereLinks.Views
         /// <summary>
         /// 已提取的图片链接。
         /// </summary>
-        private static readonly ICollection<string> ImageLinks = new HashSet<string>();
+        private static readonly HashSet<string> ImageLinks = new HashSet<string>();
 
         /// <summary>
         /// 显示控制台窗口，并传递程序启动参数。
@@ -111,8 +111,8 @@ namespace XstarS.YandereLinks.Views
 
                 foreach (var page in pages)
                 {
-                    if (enumCount == 0) { ConsoleWindow.ExtractPage(page); }
-                    else { ConsoleWindow.EnumeratePages(page, enumCount); }
+                    if (enumCount == 0) { ConsoleWindow.ExtractImageLinksAsync(page); }
+                    else { ConsoleWindow.EnumeratePageExtractAsync(page, enumCount); }
                 }
 
                 while (ConsoleWindow.WorkingThreads != 0) { Thread.Sleep(10); }
@@ -127,6 +127,22 @@ namespace XstarS.YandereLinks.Views
                 Console.WriteLine(Properties.StringResources.ConsoleWindow_Complete);
                 Console.ReadKey();
             }
+        }
+
+        /// <summary>
+        /// 将帮助信息输出到控制台。
+        /// </summary>
+        private static void ShowHelp()
+        {
+            Console.WriteLine();
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_Usage);
+            Console.WriteLine();
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_PageLink);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_PageCount);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_MaxThreads);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_OutFile);
+            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_Help);
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -151,26 +167,10 @@ namespace XstarS.YandereLinks.Views
         }
 
         /// <summary>
-        /// 将帮助信息输出到控制台。
-        /// </summary>
-        private static void ShowHelp()
-        {
-            Console.WriteLine();
-            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_Usage);
-            Console.WriteLine();
-            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_PageLink);
-            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_PageCount);
-            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_MaxThreads);
-            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_OutFile);
-            Console.WriteLine(Properties.StringResources.ConsoleWindow_Help_Help);
-            Console.WriteLine();
-        }
-
-        /// <summary>
         /// 提取页面中包含的图片链接。
         /// </summary>
         /// <param name="page">页面连接提取对象。</param>
-        private static void ExtractLinks(YanderePage page)
+        private static void ExtractImageLinks(YanderePage page)
         {
             lock (ConsoleWindow.SyncRoot)
             {
@@ -206,25 +206,13 @@ namespace XstarS.YandereLinks.Views
         }
 
         /// <summary>
-        /// 提取页面中包含的图片链接的线程池回调方法。
-        /// </summary>
-        /// <param name="state">包含回调方法要使用的信息的对象，
-        /// 应为 <see cref="YanderePage"/>。</param>
-        private static void OnExtractLinks(object state)
-        {
-            if (state is YanderePage page)
-            {
-                ConsoleWindow.ExtractLinks(page);
-            }
-        }
-
-        /// <summary>
         /// 异步提取页面中包含的图片链接。
         /// </summary>
         /// <param name="page">页面链接提取对象。</param>
-        private static void ExtractPage(YanderePage page)
+        private static void ExtractImageLinksAsync(YanderePage page)
         {
-            ThreadPool.QueueUserWorkItem(ConsoleWindow.OnExtractLinks, page);
+            ThreadPool.QueueUserWorkItem(
+                state => ConsoleWindow.ExtractImageLinks((YanderePage)state), page);
         }
 
         /// <summary>
@@ -233,14 +221,14 @@ namespace XstarS.YandereLinks.Views
         /// <param name="page">页面链接提取对象。</param>
         /// <param name="enumCount">指定遍历的页面数量；
         /// 为 -1 则遍历至最后一页，为 0 则不进行遍历。默认为 0。</param>
-        private static void EnumeratePages(YanderePage page, int enumCount = -1)
+        private static void EnumeratePageExtractAsync(YanderePage page, int enumCount = -1)
         {
             enumCount = (enumCount < 0) ?
                 (page.Count - page.Index + 1) :
                 ((enumCount == 0) ? 1 : enumCount);
             for (int i = page.Index; i < page.Index + enumCount; i++)
             {
-                ConsoleWindow.ExtractPage(page[i]);
+                ConsoleWindow.ExtractImageLinksAsync(page[i]);
             }
         }
     }

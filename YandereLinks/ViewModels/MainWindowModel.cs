@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using XstarS.ComponentModel;
 using XstarS.YandereLinks.Models;
 
@@ -18,16 +17,10 @@ namespace XstarS.YandereLinks.ViewModels
         /// </summary>
         public MainWindowModel()
         {
-            this.ExtractCancellationSource = new CancellationTokenSource();
-            this.ExtractLinksCommand = this.CreateExtractLinksCommand();
-            this.EnumerateExtractLinksCommand = this.CreateEnumerateExtractLinksCommand();
-            this.CancelExtractLinksCommand = this.CreateCancelExtractLinksCommand();
-            this.CopyLinksCommand = this.CreateCopyLinksCommand();
-            this.ClearLinksCommand = this.CreateClearLinksCommand();
-
             this.PageLink = this.HomePageLink;
             this.ImageLinks = string.Empty;
             this.CanExtract = true;
+            this.ExtractCancellationSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -106,129 +99,58 @@ namespace XstarS.YandereLinks.ViewModels
         }
 
         /// <summary>
-        /// 表示提取图片链接的命令。
+        /// 异步提取当前页面包含的图片链接。
         /// </summary>
-        public DelegateCommand ExtractLinksCommand { get; }
-
-        /// <summary>
-        /// 创建 <see cref="MainWindowModel.ExtractLinksCommand"/>。
-        /// </summary>
-        /// <returns><see cref="MainWindowModel.ExtractLinksCommand"/>。</returns>
-        private DelegateCommand CreateExtractLinksCommand()
+        public Task ExtractImageLinksAsync()
         {
-            return new DelegateCommand(
-                () => Task.Run(() =>
+            return Task.Run(() =>
+            {
+                if (this.CanExtract)
                 {
-                    if (this.CanExtract)
-                    {
-                        this.CanExtract = false;
-                        this.ExtractImageLinks();
-                        this.CanExtract = true;
-                    }
-                }),
-                () => this.CanExtract);
+                    this.CanExtract = false;
+                    this.ExtractImageLinks();
+                    this.CanExtract = true;
+                }
+            });
         }
 
         /// <summary>
-        /// 表示遍历页面并提取图片链接的命令。
+        /// 异步提取当前页面到最后页面包含的图片链接。
         /// </summary>
-        public DelegateCommand EnumerateExtractLinksCommand { get; }
-
-        /// <summary>
-        /// 创建 <see cref="MainWindowModel.EnumerateExtractLinksCommand"/>。
-        /// </summary>
-        /// <returns><see cref="MainWindowModel.EnumerateExtractLinksCommand"/>。</returns>
-        private DelegateCommand CreateEnumerateExtractLinksCommand()
+        public Task EnumeratePageExtractAsync()
         {
-            return new DelegateCommand(
-                () => Task.Run(() =>
+            return Task.Run(() =>
+            {
+                if (this.CanExtract)
                 {
-                    if (this.CanExtract)
+                    this.CanExtract = false;
+                    var page = this.PageObject;
+                    var token = this.ExtractCancellationSource.Token;
+                    if (YanderePage.IsYanderePage(page) && !token.IsCancellationRequested)
                     {
-                        this.CanExtract = false;
-                        var page = this.PageObject;
-                        var token = this.ExtractCancellationSource.Token;
-                        if (YanderePage.IsYanderePage(page) && !token.IsCancellationRequested)
+                        foreach (var nextPage in page)
                         {
-                            foreach (var nextPage in page)
-                            {
-                                if (token.IsCancellationRequested) { break; }
-                                this.PageLink = nextPage.PageLink;
-                                this.ExtractImageLinks();
-                            }
+                            if (token.IsCancellationRequested) { break; }
+                            this.PageLink = nextPage.PageLink;
+                            this.ExtractImageLinks();
                         }
-                        this.CanExtract = true;
                     }
-                }),
-                () => this.CanExtract);
+                    this.CanExtract = true;
+                }
+            });
         }
 
         /// <summary>
-        /// 表示取消提取图片链接的命令。
+        /// 取消提取图片链接的异步操作。
         /// </summary>
-        public DelegateCommand CancelExtractLinksCommand { get; }
-
-        /// <summary>
-        /// 创建 <see cref="MainWindowModel.CancelExtractLinksCommand"/>。
-        /// </summary>
-        /// <returns><see cref="MainWindowModel.CancelExtractLinksCommand"/>。</returns>
-        private DelegateCommand CreateCancelExtractLinksCommand()
+        public void CancelExtract()
         {
-            return new DelegateCommand(
-                () =>
-                {
-                    if (this.CanCancelExtract)
-                    {
-                        this.ExtractCancellationSource.Cancel();
-                        this.ExtractCancellationSource = new CancellationTokenSource();
-                        this.PageObject.Refresh();
-                    }
-                },
-                () => this.CanCancelExtract);
-        }
-
-        /// <summary>
-        /// 表示复制已提取的图片链接到剪贴板的命令。
-        /// </summary>
-        public DelegateCommand CopyLinksCommand { get; }
-
-        /// <summary>
-        /// 创建 <see cref="MainWindowModel.CopyLinksCommand"/>。
-        /// </summary>
-        /// <returns><see cref="MainWindowModel.CopyLinksCommand"/>。</returns>
-        private DelegateCommand CreateCopyLinksCommand()
-        {
-            return new DelegateCommand(
-                () =>
-                {
-                    if (this.HasImageLinks)
-                    {
-                        Clipboard.SetText(this.ImageLinks);
-                    }
-                },
-                () => this.HasImageLinks);
-        }
-
-        /// <summary>
-        /// 表示清除已提取的图片链接的命令。
-        /// </summary>
-        public DelegateCommand ClearLinksCommand { get; }
-
-        /// <summary>
-        /// 创建 <see cref="MainWindowModel.ClearLinksCommand"/>。
-        /// </summary>
-        /// <returns><see cref="MainWindowModel.ClearLinksCommand"/>。</returns>
-        private DelegateCommand CreateClearLinksCommand()
-        {
-            return new DelegateCommand(
-                () =>
-                {
-                    if (this.HasImageLinks)
-                    {
-                        this.ImageLinks = string.Empty;
-                    }
-                },
-                () => this.HasImageLinks);
+            if (this.CanCancelExtract)
+            {
+                this.ExtractCancellationSource.Cancel();
+                this.ExtractCancellationSource = new CancellationTokenSource();
+                this.PageObject.Refresh();
+            }
         }
 
         /// <summary>
@@ -243,18 +165,9 @@ namespace XstarS.YandereLinks.ViewModels
             {
                 case nameof(this.CanExtract):
                     this.NotifyPropertyChanged(nameof(this.CanCancelExtract));
-                    this.ExtractLinksCommand.NotifyCanExecuteChanged();
-                    this.EnumerateExtractLinksCommand.NotifyCanExecuteChanged();
-                    break;
-                case nameof(this.CanCancelExtract):
-                    this.CancelExtractLinksCommand.NotifyCanExecuteChanged();
                     break;
                 case nameof(this.ImageLinks):
                     this.NotifyPropertyChanged(nameof(this.HasImageLinks));
-                    break;
-                case nameof(this.HasImageLinks):
-                    this.CopyLinksCommand.NotifyCanExecuteChanged();
-                    this.ClearLinksCommand.NotifyCanExecuteChanged();
                     break;
                 default:
                     break;

@@ -59,7 +59,7 @@ namespace XstarS.Win32
             if (!ConsoleManager.HasConsole)
             {
                 ConsoleManager.SafeNativeMethods.AllocConsole();
-                ConsoleManager.InvalidateStdOutError();
+                ConsoleManager.InitializeStdOutError();
             }
         }
 
@@ -91,9 +91,9 @@ namespace XstarS.Win32
         }
 
         /// <summary>
-        /// 释放 <see cref="Console"/> 的标准输出流和错误流，以触发其重新初始化。
+        /// 重新初始化 <see cref="Console"/> 的标准输出流和错误流。
         /// </summary>
-        private static void InvalidateStdOutError()
+        private static void InitializeStdOutError()
         {
             var t_Console = typeof(Console);
             var staticNoPublic = BindingFlags.Static | BindingFlags.NonPublic;

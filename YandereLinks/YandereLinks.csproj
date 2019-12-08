@@ -62,8 +62,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Commands\CommandBase.cs" />
-    <Compile Include="Commands\DelegateCommand.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -74,12 +72,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Views\NaviWebBrowser.xaml.cs">
-      <DependentUpon>NaviWebBrowser.xaml</DependentUpon>
+    <Compile Include="Views\NavigationWebBrowser.xaml.cs">
+      <DependentUpon>NavigationWebBrowser.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ConsoleWindow.cs" />
     <Compile Include="Helpers\ConsoleManager.cs" />
-    <Compile Include="Helpers\ControlExtensions.cs" />
     <Compile Include="Helpers\ArgumentReader.cs" />
     <Compile Include="Helpers\SystemComponents.cs" />
     <Compile Include="Bindings\ObservableBase.cs" />
@@ -100,7 +97,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\NaviWebBrowser.xaml">
+    <Page Include="Views\NavigationWebBrowser.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -4,7 +4,7 @@ using XstarS.YandereLinks.Views;
 namespace XstarS.YandereLinks
 {
     /// <summary>
-    /// App.xaml 的交互逻辑。
+    /// 表示应用程序的入口点。
     /// </summary>
     public partial class App : Application
     {

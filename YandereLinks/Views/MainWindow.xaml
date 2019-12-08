@@ -9,21 +9,14 @@
         Height="720" Width="1280" MinHeight="450" MinWidth="800" WindowStartupLocation="CenterScreen"
         Title="{x:Static props:StringResources.MainWindow_Title}" Icon="../Properties/YandereLinks.ico"
         Loaded="ThisWindow_Loaded">
-    <Window.InputBindings>
-        <KeyBinding Modifiers="Ctrl" Key="E" Command="{Binding ExtractLinksCommand}"/>
-        <KeyBinding Modifiers="Ctrl" Key="R" Command="{Binding EnumerateExtractLinksCommand}"/>
-        <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding CancelExtractLinksCommand}"/>
-        <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding CopyLinksCommand}"/>
-        <KeyBinding Modifiers="Ctrl" Key="X" Command="{Binding ClearLinksCommand}"/>
-    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="5"/>
             <RowDefinition Height="160" MinHeight="160" MaxHeight="320"/>
         </Grid.RowDefinitions>
-        <local:NaviWebBrowser HomeSource="{Binding HomePageLink, Mode=OneTime}"
-                              Source="{Binding PageLink, Mode=TwoWay}"/>
+        <local:NavigationWebBrowser HomeSource="{Binding HomePageLink, Mode=OneTime}"
+                                    Source="{Binding PageLink, Mode=TwoWay}"/>
         <GridSplitter Grid.Row="1" VerticalContentAlignment="Center"
                       HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"/>
         <Grid Grid.Row="2">
@@ -45,19 +38,19 @@
                 </Grid.RowDefinitions>
                 <Button Grid.Row="0" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_ExtractButton}"
-                        Command="{Binding ExtractLinksCommand}"/>
+                        Command="{x:Static local:MainWindow.ExtractImageLinksCommand}"/>
                 <Button Grid.Row="1" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_EnumerateButton}"
-                        Command="{Binding EnumerateExtractLinksCommand}"/>
+                        Command="{x:Static local:MainWindow.EnumeratePageExtractCommand}"/>
                 <Button Grid.Row="2" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_CancelButton}"
-                        Command="{Binding CancelExtractLinksCommand}"/>
+                        Command="{x:Static local:MainWindow.CancelExtractCommand}"/>
                 <Button Grid.Row="4" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_CopyButton}"
-                        Command="{Binding CopyLinksCommand}"/>
+                        Command="{x:Static local:MainWindow.CopyImageLinksCommand}"/>
                 <Button Grid.Row="5" Margin="2.5"
                         Content="{x:Static props:StringResources.MainWindow_ClearButton}"
-                        Command="{Binding ClearLinksCommand}"/>
+                        Command="{x:Static local:MainWindow.ClearImageLinksCommand}"/>
             </Grid>
         </Grid>
     </Grid>

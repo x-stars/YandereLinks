@@ -61,22 +61,19 @@ namespace XstarS.YandereLinks.Models
         protected static readonly string NextPageLinkPrefix;
 
         /// <summary>
-        /// 页面的链接。
-        /// 使用 <see cref="YanderePage.PageLink"/> 访问以执行对象释放检查。
+        /// 指示当前对象是否已经被释放。
         /// </summary>
-        private readonly string _PageLink;
+        private volatile bool IsDisposed = false;
 
         /// <summary>
-        /// 用于 HTTP 访问的客户端对象。
-        /// 使用 <see cref="YanderePage.HttpClient"/> 访问以执行对象释放检查。
+        /// <see cref="YanderePage.HttpClient"/> 的值。
         /// </summary>
         private HttpClient _HttpClient;
 
         /// <summary>
-        /// 获取 HTML 文本的任务。
-        /// 使用 <see cref="YanderePage.DocumentTextTask"/> 访问以执行对象释放检查。
+        /// <see cref="YanderePage.DocumentTextAsync"/> 的值。
         /// </summary>
-        private Task<string> _DocumentTextTask;
+        private Task<string> _DocumentTextAsync;
 
         /// <summary>
         /// 初始化 <see cref="YanderePage"/> 类的静态成员。
@@ -107,7 +104,21 @@ namespace XstarS.YandereLinks.Models
         /// <paramref name="pageLink"/> 为 <see langword="null"/>。</exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="pageLink"/> 不为合法的绝对 URI。</exception>
-        public YanderePage(string pageLink) : this(pageLink, true) { }
+        public YanderePage(string pageLink)
+        {
+            if (pageLink is null)
+            {
+                throw new ArgumentNullException(nameof(pageLink));
+            }
+            if (!Uri.TryCreate(pageLink, UriKind.Absolute, out _))
+            {
+                throw new ArgumentException(new ArgumentException().Message, nameof(pageLink));
+            }
+
+            this.PageLink = pageLink;
+            this.HttpClient = new HttpClient();
+            this.DocumentTextAsync = this._HttpClient.GetStringAsync(pageLink);
+        }
 
         /// <summary>
         /// 使用页面的链接和 HTML 文本初始化 <see cref="YanderePage"/> 类的新实例。
@@ -118,101 +129,69 @@ namespace XstarS.YandereLinks.Models
         /// <paramref name="documentText"/> 为 <see langword="null"/>。</exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="pageLink"/> 不为合法的绝对 URI。</exception>
-        public YanderePage(string pageLink, string documentText) : this(pageLink, false)
-        {
-            if (documentText is null)
-            {
-                throw new ArgumentNullException(nameof(documentText));
-            }
-
-            this._DocumentTextTask = new Task<string>(() => documentText);
-            this._DocumentTextTask.RunSynchronously();
-        }
-
-        /// <summary>
-        /// 使用页面的链接初始化 <see cref="YanderePage"/> 类的新实例，
-        /// 并指定是否获取页面的 HTML 文本。
-        /// </summary>
-        /// <remarks>
-        /// 若在派生类的初始化方法中调用了此初始化方法，
-        /// 应重写 <see cref="YanderePage.DocumentText"/> 属性，
-        /// 以确保基类能够正确读取页面的 HTML 文本并获取链接。
-        /// </remarks>
-        /// <param name="pageLink">页面的链接。</param>
-        /// <param name="getsDocument">指示是否获取页面的 HTML 文本。</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="pageLink"/> 为 <see langword="null"/>。</exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="pageLink"/> 不为合法的绝对 URI。</exception>
-        protected YanderePage(string pageLink, bool getsDocument)
+        public YanderePage(string pageLink, string documentText)
         {
             if (pageLink is null)
             {
                 throw new ArgumentNullException(nameof(pageLink));
             }
-            else if (!Uri.TryCreate(pageLink, UriKind.Absolute, out var _))
+            if (!Uri.TryCreate(pageLink, UriKind.Absolute, out var _))
             {
                 throw new ArgumentException(new ArgumentException().Message, nameof(pageLink));
             }
+            if (documentText is null)
+            {
+                throw new ArgumentNullException(nameof(documentText));
+            }
 
-            this._PageLink = pageLink;
-            this._HttpClient = new HttpClient();
-            this._DocumentTextTask = getsDocument ?
-                this._HttpClient.GetStringAsync(pageLink) : null;
+            this.PageLink = pageLink;
+            this.DocumentTextAsync = Task.Run(() => documentText);
         }
-
-        /// <summary>
-        /// 指示当前对象是否已经被释放。
-        /// </summary>
-        protected bool IsDisposed { get; private set; } = false;
-
-        /// <summary>
-        /// 获取当前对象，并检查当前对象是否已经被释放。
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">当前对象已经被释放。</exception>
-        protected YanderePage Disposable => this.IsDisposed ?
-            throw new ObjectDisposedException(this.GetType().ToString()) : this;
 
         /// <summary>
         /// 页面的链接。
         /// </summary>
-        public string PageLink => this.Disposable._PageLink;
+        public string PageLink { get; }
 
         /// <summary>
         /// 用于 HTTP 访问的客户端对象。
         /// </summary>
         private HttpClient HttpClient
         {
-            get => this.Disposable._HttpClient;
-            set => this.Disposable._HttpClient = value;
+            get => !this.IsDisposed ? this._HttpClient :
+                throw new ObjectDisposedException(this.GetType().ToString());
+            set => this._HttpClient = !this.IsDisposed ? value :
+                throw new ObjectDisposedException(this.GetType().ToString());
         }
 
         /// <summary>
-        /// 获取 HTML 文本的任务。
+        /// 异步获取页面的 HTML 文本。
         /// </summary>
-        private Task<string> DocumentTextTask
+        public Task<string> DocumentTextAsync
         {
-            get => this.Disposable._DocumentTextTask;
-            set => this.Disposable._DocumentTextTask = value;
+            get => !this.IsDisposed ? this._DocumentTextAsync :
+                throw new ObjectDisposedException(this.GetType().ToString());
+            private set => this._DocumentTextAsync = !this.IsDisposed ? value :
+                throw new ObjectDisposedException(this.GetType().ToString());
         }
 
         /// <summary>
-        /// 页面的 HTML 文本。
+        /// 获取页面的 HTML 文本。
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public virtual string DocumentText
+        public string DocumentText
         {
             get
             {
-                if (this.DocumentTextTask is null)
+                if (this.DocumentTextAsync is null)
                 {
                     return string.Empty;
                 }
 
                 try
                 {
-                    return this.DocumentTextTask.Result;
+                    return this.DocumentTextAsync.Result;
                 }
                 catch (Exception e)
                 when (e.InnerException is TaskCanceledException)
@@ -251,22 +230,22 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// 当前页面的索引。
+        /// 获取当前页面的索引。
         /// </summary>
         public int Index
         {
             get
             {
-                string pageIndexPrefix = "page=";
-                string pageLink = this.PageLink;
+                var pageIndexPrefix = "page=";
+                var pageLink = this.PageLink;
 
                 if (!pageLink.Contains(pageIndexPrefix))
                 {
                     return 1;
                 }
 
-                string pageIndexString = string.Empty;
-                int startIndex = pageLink.IndexOf(pageIndexPrefix) +
+                var pageIndexString = string.Empty;
+                var startIndex = pageLink.IndexOf(pageIndexPrefix) +
                     pageIndexPrefix.Length;
                 for (int i = startIndex; i < pageLink.Length; i++)
                 {
@@ -284,13 +263,13 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// 当前页面能够直接导航的页面数量。
+        /// 获取当前页面能够直接导航的页面数量。
         /// </summary>
         public int Count
         {
             get
             {
-                string documentText = this.DocumentText;
+                var documentText = this.DocumentText;
 
                 if (!documentText.Contains(YanderePage.NextPageLinkPrefix))
                 {
@@ -298,8 +277,8 @@ namespace XstarS.YandereLinks.Models
                         this.Index : 1;
                 }
 
-                string lastPageIndexString = string.Empty;
-                int endIndex = documentText.IndexOf(YanderePage.NextPageLinkPrefix);
+                var lastPageIndexString = string.Empty;
+                var endIndex = documentText.IndexOf(YanderePage.NextPageLinkPrefix);
                 for (int i = endIndex; i >= 0; i--)
                 {
                     if (char.IsDigit(documentText[i]))
@@ -316,20 +295,20 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// 页面包含的图片链接。
+        /// 获取页面包含的图片链接。
         /// </summary>
         public string[] ImageLinks
         {
             get
             {
-                string documentText = this.DocumentText;
+                var documentText = this.DocumentText;
 
                 var imageLinks = new List<string>();
                 while (documentText.Contains(YanderePage.ImageLinkPrefix))
                 {
-                    int startIndex = documentText.IndexOf(YanderePage.ImageLinkPrefix) +
+                    var startIndex = documentText.IndexOf(YanderePage.ImageLinkPrefix) +
                         YanderePage.ImageLinkPrefix.Length;
-                    string imageLink = documentText.Substring(startIndex);
+                    var imageLink = documentText.Substring(startIndex);
                     imageLink = imageLink.Remove(imageLink.IndexOf('"'));
                     imageLinks.Add(imageLink);
                     documentText = documentText.Substring(startIndex);
@@ -339,20 +318,20 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// Pools 页面的所有 Pool 页面的链接。
+        /// 获取 Pools 页面的所有 Pool 页面的链接。
         /// </summary>
         public string[] PoolPageLinks
         {
             get
             {
-                string documentText = this.DocumentText;
+                var documentText = this.DocumentText;
 
                 var poolPageLinks = new List<string>();
                 while (documentText.Contains(YanderePage.PoolPageLinkPrefix))
                 {
-                    int startIndex = documentText.IndexOf(YanderePage.PoolPageLinkPrefix) +
+                    var startIndex = documentText.IndexOf(YanderePage.PoolPageLinkPrefix) +
                         YanderePage.PoolPageLinkPrefix.Length;
-                    string poolPageLink = documentText.Substring(startIndex);
+                    var poolPageLink = documentText.Substring(startIndex);
                     poolPageLink = poolPageLink.Remove(poolPageLink.IndexOf('"'));
                     poolPageLinks.Add(YanderePage.PoolPageLinkStatic + poolPageLink);
                     documentText = documentText.Substring(startIndex);
@@ -362,69 +341,69 @@ namespace XstarS.YandereLinks.Models
         }
 
         /// <summary>
-        /// Pools 页面的所有 Pool 页面的 <see cref="YanderePage"/> 对象。
+        /// 获取 Pools 页面的所有 Pool 页面的 <see cref="YanderePage"/> 对象。
         /// </summary>
         public YanderePage[] PoolPages =>
             Array.ConvertAll(this.PoolPageLinks, pageLink => new YanderePage(pageLink));
 
         /// <summary>
-        /// 上一页面的链接。
+        /// 获取上一页面的链接。
         /// </summary>
         public string PrevPageLink
         {
             get
             {
-                string documentText = this.DocumentText;
+                var documentText = this.DocumentText;
 
                 if (!documentText.Contains(YanderePage.PrevPageLinkPrefix))
                 {
                     return null;
                 }
 
-                int startIndex = documentText.IndexOf(YanderePage.PrevPageLinkPrefix) +
+                var startIndex = documentText.IndexOf(YanderePage.PrevPageLinkPrefix) +
                     YanderePage.PrevPageLinkPrefix.Length;
-                string prevPageLink = documentText.Substring(startIndex);
+                var prevPageLink = documentText.Substring(startIndex);
                 prevPageLink = prevPageLink.Remove(prevPageLink.IndexOf('"'));
                 return YanderePage.IndexPageLink + prevPageLink;
             }
         }
 
         /// <summary>
-        /// 上一页面的 <see cref="YanderePage"/> 对象。
+        /// 获取上一页面的 <see cref="YanderePage"/> 对象。
         /// </summary>
         public YanderePage PrevPage =>
             (this.PrevPageLink is null) ? null : new YanderePage(this.PrevPageLink);
 
         /// <summary>
-        /// 下一页面的链接。
+        /// 获取下一页面的链接。
         /// </summary>
         public string NextPageLink
         {
             get
             {
-                string documentText = this.DocumentText;
+                var documentText = this.DocumentText;
 
                 if (!documentText.Contains(YanderePage.NextPageLinkPrefix))
                 {
                     return null;
                 }
 
-                int startIndex = documentText.IndexOf(YanderePage.NextPageLinkPrefix) +
+                var startIndex = documentText.IndexOf(YanderePage.NextPageLinkPrefix) +
                     YanderePage.NextPageLinkPrefix.Length;
-                string nextPageLink = documentText.Substring(startIndex);
+                var nextPageLink = documentText.Substring(startIndex);
                 nextPageLink = nextPageLink.Remove(nextPageLink.IndexOf('"'));
                 return YanderePage.IndexPageLink + nextPageLink;
             }
         }
 
         /// <summary>
-        /// 下一页面的 <see cref="YanderePage"/> 对象。
+        /// 获取下一页面的 <see cref="YanderePage"/> 对象。
         /// </summary>
         public YanderePage NextPage =>
             (this.NextPageLink is null) ? null : new YanderePage(this.NextPageLink);
 
         /// <summary>
-        /// 指示页面是否为 yande.re 的页面。
+        /// 确定指定页面是否为 yande.re 的页面。
         /// </summary>
         /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
         /// <returns>若 <paramref name="page"/> 为 yande.re 的页面，
@@ -434,7 +413,7 @@ namespace XstarS.YandereLinks.Models
             page.PageLink.StartsWith(YanderePage.IndexPageLink);
 
         /// <summary>
-        /// 指示页面是否为 Posts 页面。
+        /// 确定指定页面是否为 Posts 页面。
         /// </summary>
         /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
         /// <returns>若 <paramref name="page"/> 为 Posts 页面，
@@ -445,7 +424,7 @@ namespace XstarS.YandereLinks.Models
             !page.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
 
         /// <summary>
-        /// 指示页面是否为 Pools 页面。
+        /// 确定指定页面是否为 Pools 页面。
         /// </summary>
         /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
         /// <returns>若 <paramref name="page"/> 为 Pools 页面，
@@ -456,7 +435,7 @@ namespace XstarS.YandereLinks.Models
             !page.PageLink.StartsWith(YanderePage.PoolPageLinkStatic);
 
         /// <summary>
-        /// 指示页面是否为 Post 页面。
+        /// 确定指定页面是否为 Post 页面。
         /// </summary>
         /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
         /// <returns>若 <paramref name="page"/> 为 Post 页面，
@@ -466,7 +445,7 @@ namespace XstarS.YandereLinks.Models
             page.PageLink.StartsWith(YanderePage.PostPageLinkStatic);
 
         /// <summary>
-        /// 指示页面是否为 Pool 页面。
+        /// 确定指定页面是否为 Pool 页面。
         /// </summary>
         /// <param name="page">待验证的 <see cref="YanderePage"/> 对象。</param>
         /// <returns>若 <paramref name="page"/> 为 Pool 页面，
@@ -490,15 +469,15 @@ namespace XstarS.YandereLinks.Models
                 return this;
             }
 
-            string pageIndexPrefix = "page=";
-            string pageLink = (this.PageLink == YanderePage.IndexPageLink) ?
+            var pageIndexPrefix = "page=";
+            var pageLink = (this.PageLink == YanderePage.IndexPageLink) ?
                 YanderePage.PostsPageLink : this.PageLink;
 
             string indexPageLink;
             if (pageLink.Contains(pageIndexPrefix))
             {
-                int pageIndexLength = 0;
-                int startIndex = pageLink.IndexOf(pageIndexPrefix) + pageIndexPrefix.Length;
+                var pageIndexLength = 0;
+                var startIndex = pageLink.IndexOf(pageIndexPrefix) + pageIndexPrefix.Length;
                 for (int i = startIndex; i < pageLink.Length; i++)
                 {
                     if (char.IsDigit(pageLink[i]))
@@ -510,12 +489,12 @@ namespace XstarS.YandereLinks.Models
                         break;
                     }
                 }
-                indexPageLink = pageLink.Remove(startIndex, pageIndexLength).
-                    Insert(startIndex, index.ToString());
+                indexPageLink = pageLink.Remove(
+                    startIndex, pageIndexLength).Insert(startIndex, index.ToString());
             }
             else
             {
-                string paramModifier = pageLink.Contains("?") ? "&" : "?";
+                var paramModifier = pageLink.Contains("?") ? "&" : "?";
                 indexPageLink = pageLink + paramModifier + pageIndexPrefix + index.ToString();
             }
             return new YanderePage(indexPageLink);
@@ -527,8 +506,8 @@ namespace XstarS.YandereLinks.Models
         public virtual void Refresh()
         {
             this.Cancel();
-            this.DocumentTextTask?.Dispose();
-            this.DocumentTextTask = this.HttpClient?.GetStringAsync(this.PageLink);
+            this.DocumentTextAsync?.Dispose();
+            this.DocumentTextAsync = this.HttpClient?.GetStringAsync(this.PageLink);
         }
 
         /// <summary>
@@ -539,7 +518,7 @@ namespace XstarS.YandereLinks.Models
         public virtual void Cancel()
         {
             this.HttpClient?.CancelPendingRequests();
-            try { this.DocumentTextTask?.Wait(); } catch { }
+            try { this.DocumentTextAsync?.Wait(); } catch { }
         }
 
         /// <summary>
@@ -568,10 +547,10 @@ namespace XstarS.YandereLinks.Models
                 if (disposing)
                 {
                     this.Cancel();
-                    this._DocumentTextTask?.Dispose();
-                    this._DocumentTextTask = null;
-                    this._HttpClient?.Dispose();
-                    this._HttpClient = null;
+                    this.DocumentTextAsync?.Dispose();
+                    this.DocumentTextAsync = null;
+                    this.HttpClient?.Dispose();
+                    this.HttpClient = null;
                 }
 
                 this.IsDisposed = true;
