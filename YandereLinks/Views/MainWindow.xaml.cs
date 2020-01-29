@@ -5,7 +5,6 @@ using System.Security;
 using System.Windows;
 using System.Windows.Input;
 using XstarS.Win32;
-using XstarS.YandereLinks.ViewModels;
 
 namespace XstarS.YandereLinks.Views
 {

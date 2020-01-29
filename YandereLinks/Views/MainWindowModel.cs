@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using XstarS.ComponentModel;
 using XstarS.YandereLinks.Models;
 
-namespace XstarS.YandereLinks.ViewModels
+namespace XstarS.YandereLinks.Views
 {
     /// <summary>
     /// 表示主窗口的数据逻辑的模型。

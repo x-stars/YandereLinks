@@ -83,7 +83,7 @@
     <Compile Include="Bindings\ObservableObject.cs" />
     <Compile Include="Bindings\ObservableStorage.cs" />
     <Compile Include="Properties\StringResources.cs" />
-    <Compile Include="ViewModels\MainWindowModel.cs" />
+    <Compile Include="Views\MainWindowModel.cs" />
     <Compile Include="Models\YanderePage.cs" />
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -139,11 +140,14 @@ namespace XstarS.YandereLinks.Views
                 typeof(string), typeof(NavigationWebBrowser), new PropertyMetadata(string.Empty,
                     NavigationWebBrowser.OnSourcePropertyChanged));
 
+
         /// <summary>
         /// <see cref="NavigationWebBrowser.SourceProperty"/> 依赖属性发生更改的事件处理。
         /// </summary>
         /// <param name="d">包含依赖属性的 <see cref="NavigationWebBrowser"/>。</param>
         /// <param name="e">提供事件数据的对象。</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static void OnSourcePropertyChanged(
             DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -151,7 +155,11 @@ namespace XstarS.YandereLinks.Views
             {
                 if (navi.MainWebBrowser.Source?.OriginalString != source)
                 {
-                    navi.MainWebBrowser.Navigate(source);
+                    try
+                    {
+                        navi.MainWebBrowser.Navigate(source);
+                    }
+                    catch (Exception) { }
                 }
             }
         }

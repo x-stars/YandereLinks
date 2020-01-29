@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:XstarS.YandereLinks.Views"
         xmlns:props="clr-namespace:XstarS.YandereLinks.Properties"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:MainWindowModel}"
         Height="720" Width="1280" MinHeight="450" MinWidth="800" WindowStartupLocation="CenterScreen"
         Title="{x:Static props:StringResources.MainWindow_Title}" Icon="../Properties/YandereLinks.ico"
         Loaded="ThisWindow_Loaded">
