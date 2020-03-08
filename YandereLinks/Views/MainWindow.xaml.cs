@@ -177,8 +177,7 @@ namespace XstarS.YandereLinks.Views
                 case nameof(this.Model.CanExtract):
                 case nameof(this.Model.CanCancelExtract):
                 case nameof(this.Model.HasImageLinks):
-                    this.Dispatcher.Invoke(
-                        () => CommandManager.InvalidateRequerySuggested());
+                    this.Dispatcher.Invoke(CommandManager.InvalidateRequerySuggested);
                     break;
                 default:
                     break;

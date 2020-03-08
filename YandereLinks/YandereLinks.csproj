@@ -79,9 +79,8 @@
     <Compile Include="Helpers\ConsoleManager.cs" />
     <Compile Include="Helpers\ArgumentReader.cs" />
     <Compile Include="Helpers\SystemComponents.cs" />
-    <Compile Include="Bindings\ObservableBase.cs" />
+    <Compile Include="Bindings\ObservableDataObject.cs" />
     <Compile Include="Bindings\ObservableObject.cs" />
-    <Compile Include="Bindings\ObservableStorage.cs" />
     <Compile Include="Properties\StringResources.cs" />
     <Compile Include="Views\MainWindowModel.cs" />
     <Compile Include="Models\YanderePage.cs" />

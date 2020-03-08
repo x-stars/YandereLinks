@@ -10,7 +10,7 @@ namespace XstarS.YandereLinks.Views
     /// <summary>
     /// 表示主窗口的数据逻辑的模型。
     /// </summary>
-    public class MainWindowModel : ObservableStorage
+    public class MainWindowModel : ObservableDataObject
     {
         /// <summary>
         /// 初始化 <see cref="MainWindowModel"/> 类的新实例。

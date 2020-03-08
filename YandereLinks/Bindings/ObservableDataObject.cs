@@ -9,7 +9,7 @@ namespace XstarS.ComponentModel
     /// 提供属性更改通知类型 <see cref="INotifyPropertyChanged"/> 基于数据存储的抽象基类。
     /// </summary>
     [Serializable]
-    public abstract class ObservableStorage : ObservableBase
+    public abstract class ObservableDataObject : ObservableObject
     {
         /// <summary>
         /// 所有属性的数据存储。
@@ -18,9 +18,9 @@ namespace XstarS.ComponentModel
             new ConcurrentDictionary<string, object>();
 
         /// <summary>
-        /// 初始化 <see cref="ObservableStorage"/> 类的新实例。
+        /// 初始化 <see cref="ObservableDataObject"/> 类的新实例。
         /// </summary>
-        protected ObservableStorage() { }
+        protected ObservableDataObject() { }
 
         /// <summary>
         /// 获取指定属性的值。

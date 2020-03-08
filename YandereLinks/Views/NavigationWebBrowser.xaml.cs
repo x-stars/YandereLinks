@@ -230,8 +230,7 @@ namespace XstarS.YandereLinks.Views
             this.CanGoBack = this.MainWebBrowser.CanGoBack;
             this.CanGoForward = this.MainWebBrowser.CanGoForward;
             this.Source = this.MainWebBrowser.Source?.OriginalString;
-            this.Dispatcher.Invoke(
-                () => CommandManager.InvalidateRequerySuggested());
+            this.Dispatcher.Invoke(CommandManager.InvalidateRequerySuggested);
         }
     }
 }
