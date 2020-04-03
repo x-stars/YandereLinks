@@ -15,7 +15,7 @@ namespace XstarS.CommandLine
     /// 不支持多个同名的有名参数的解析。
     /// </remarks>
     [Serializable]
-    internal class ArgumentReader
+    public class ArgumentReader
     {
         /// <summary>
         /// 初始化命令行参数解析器 <see cref="ArgumentReader"/> 的新实例。

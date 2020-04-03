@@ -9,7 +9,7 @@ namespace XstarS.Win32
     /// <summary>
     /// 提供窗口应用程序的控制台窗口管理方法。
     /// </summary>
-    internal static class ConsoleManager
+    public static class ConsoleManager
     {
         /// <summary>
         /// 提供控制台相关的原生方法。

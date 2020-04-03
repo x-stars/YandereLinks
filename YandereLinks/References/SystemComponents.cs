@@ -9,7 +9,7 @@ namespace XstarS.Win32
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-    internal static class SystemComponents
+    public static class SystemComponents
     {
         /// <summary>
         /// 表示网络浏览器 Internet Explorer。

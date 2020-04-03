@@ -15,16 +15,16 @@ namespace XstarS.YandereLinks.Properties
     internal static class StringResources
     {
         /// <summary>
-        /// 字符串资源内部存储。
+        /// 表示本地化的字符串资源存储。
         /// </summary>
-        private static readonly Dictionary<CultureInfo, Dictionary<string, string>> StringStorage;
+        private static readonly Dictionary<CultureInfo, Dictionary<string, string>> LocalizedStrings;
 
         /// <summary>
         /// 初始化 <see cref="StringResources"/> 类的静态成员。
         /// </summary>
         static StringResources()
         {
-            StringResources.StringStorage = new Dictionary<CultureInfo, Dictionary<string, string>>()
+            StringResources.LocalizedStrings = new Dictionary<CultureInfo, Dictionary<string, string>>()
             {
                 {
                     new CultureInfo("zh-CN"),
@@ -111,19 +111,19 @@ namespace XstarS.YandereLinks.Properties
         /// 字符串资源支持的所有区域信息。
         /// </summary>
         public static ICollection<CultureInfo> SupportedCultures =>
-            StringResources.StringStorage.Keys;
+            StringResources.LocalizedStrings.Keys;
 
         /// <summary>
         /// 根据当前区域信息和资源名称获取指定类型的字符串资源的值。
         /// </summary>
         /// <param name="resourceName">字符串资源的名称。可由编译器自动获取。</param>
-        /// <returns><see cref="StringResources.StringStorage"/>
+        /// <returns><see cref="StringResources.LocalizedStrings"/>
         /// 中对应当前区域信息且名称为 <paramref name="resourceName"/> 的字符串资源的值。</returns>
         internal static string GetString([CallerMemberName] string resourceName = null) =>
-            StringResources.StringStorage.ContainsKey(CultureInfo.CurrentUICulture) ?
-            StringResources.StringStorage[CultureInfo.CurrentUICulture][resourceName] :
-            StringResources.StringStorage.ContainsKey(CultureInfo.InvariantCulture) ?
-            StringResources.StringStorage[CultureInfo.InvariantCulture][resourceName] :
+            StringResources.LocalizedStrings.ContainsKey(CultureInfo.CurrentUICulture) ?
+            StringResources.LocalizedStrings[CultureInfo.CurrentUICulture][resourceName] :
+            StringResources.LocalizedStrings.ContainsKey(CultureInfo.InvariantCulture) ?
+            StringResources.LocalizedStrings[CultureInfo.InvariantCulture][resourceName] :
             string.Empty;
 
         #region 字符串资源对外接口。
