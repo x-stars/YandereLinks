@@ -140,7 +140,6 @@ namespace XstarS.YandereLinks.Views
                 typeof(string), typeof(NavigationWebBrowser), new PropertyMetadata(string.Empty,
                     NavigationWebBrowser.OnSourcePropertyChanged));
 
-
         /// <summary>
         /// <see cref="NavigationWebBrowser.SourceProperty"/> 依赖属性发生更改的事件处理。
         /// </summary>
